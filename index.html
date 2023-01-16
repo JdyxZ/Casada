@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <link href="style.css" rel="stylesheet"/>
+    <title>Casada</title>
+</head>
+<body>
+    <div id="main">
+        <div class="grid-layout">
+            <div class="grid-user-profile"> 
+                <img src="icon2.jpg" alt="Prueba" class="icon">
+                <p class="text" id="username"> Myke </p>
+            </div>
+            <div class="grid-chat-profile">
+                <img src="icon1.jpg" alt="Prueba" class="icon">
+                <p class="text" id="chat-username"> Jake </p>
+            </div>
+            <div class="grid-chats">
+               <div id="chat1">
+                <img src="icon1.jpg" alt="Prueba" class="icon">
+                <p class="text" id="current-chat-username"> Jake </p>
+               </div>
+            </div>
+            <div id="current-chat" class="grid-current-chat"> 
+                <div class="message-box">
+                    <p style="color:white"> Hello, how are you? </p>
+                </div>
+            </div>
+            <div class="grid-input"> 
+                <input class="input-box">
+            </div>
+        </div>
+    </div>
+
+    <script src="code.js"></script>
+    <script>MYCHAT.init()</script>
+</body>
+</html>

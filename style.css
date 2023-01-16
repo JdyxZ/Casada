@@ -1,0 +1,111 @@
+body
+{
+    font-family: Roboto;
+    height:100%;
+    width:100%;
+    min-height:100%;
+    max-height:100%;
+    margin:0px;
+}
+
+.grid-layout
+{
+    display: grid;
+    width:100%;
+    height:100%;
+    position:fixed;
+    grid-template-columns: 20% 80%;
+    grid-auto-rows: 10% 80% 10%;
+}
+
+.grid-user-profile
+{
+    background: #182229;
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.grid-chat-profile
+{
+    background: #182229;
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.grid-chats
+{
+    background: #111b21;
+    grid-column: 1;
+    grid-row: 2/4;
+}
+
+.grid-current-chat
+{
+    display: flex;
+    background: #111b21;
+    grid-column: 2;
+    grid-row: 2;
+}
+
+.grid-input
+{
+    background: #111b21;
+    grid-column: 2;
+    grid-row: 3;
+}
+
+.input-box
+{
+    width: 80%;
+    padding: 5px;
+    background-color: white;
+    border-radius: 5px;
+}
+
+.icon
+{
+    width:50px;
+    height:50px;
+    border-radius:100%;
+    margin-right:20px;
+    margin-left:20px;
+    margin-top:20px;
+}
+
+.text
+{
+    color:white;
+    display:inline-block;
+}
+
+.message-box
+{
+    background-color:aqua;
+    display:inline-block;
+    align-self:flex-end;
+    margin-left:40%;
+    width:60%;
+    padding: 5px 5px 0px 0px;
+    border-radius: 0px 8px 8px 8px;
+}
+
+#main
+{
+    width:100%;
+    height:100%;
+}
+
+#username
+{
+    transform: translate(0px, -15px);
+}
+
+#chat-username
+{
+    transform: translate(0px, -15px);
+}
+
+#current-chat-username
+{
+    transform: translate(0px, -15px);
+}
