@@ -2,25 +2,47 @@ var MYCHAT =
 {
 	init:function()
 	{
-        var input = document.querySelector(".input-box");
+        var input = MYCHAT.Q(".input-box");
 		input.addEventListener("keydown", MYCHAT.onKeyPressed);
 	},
 
 	onKeyPressed: function(event)
 	{
+
 		if(event.code == "Enter")
         {
-            sendMessage()
+            MYCHAT.sendMessage();
         } 
 	},
 
 	sendMessage: function()
 	{
-		var input = document.querySelector(".input-box");
-        var template_message_box = document.querySelector("#template-message-box")
-		var message_box = template_message_box.cloneNode(true);
-		message_box.querySelector("p").innerText=input.value;
-		document.querySelector("#current_chat").appendChild(msg);
+		// Get input box text
+		var input = MYCHAT.Q(".input-box");
+
+		// Check input is not empty
+		if (input.value == '') return;
+
+		// Fetch template
+		var message_template = MYCHAT.Q("#message-template")
+
+		// Clone template
+		var message_box = message_template.cloneNode(true);
+
+		// Set input box text value to template
+		message_box.querySelector(".message").innerText = input.value;
+
+		// Add template to the DOM
+		MYCHAT.Q("#current-chat").appendChild(message_box);
+
+		// Show new message
+		message_box.style.display = ''
+
+		//Update scrollbar focus
+		message_box.scrollIntoView();
+
+		// Clean input box
+		input.value = ''
 	},
 
 	changeRoom:function()
@@ -35,11 +57,16 @@ var MYCHAT =
 
 	showMessage:function()
 	{
-		var template = document.querySelector("#templates .msg")
+		var template = MYCHAT.Q("#template .msg")
 		var msg = template.cloneNode(true);
 		msg.querySelector("username").innerText="Javi";
 		msg.querySelector(".content").innerText="lalala";
-		document.querySelector(".logcontent").appendChild(msg);
+		MYCHAT.Q(".logcontent").appendChild(msg);
 
+	},
+
+	Q: function(selector)
+	{
+		return document.querySelector(selector) || document.createElement("div");
 	}
 }

@@ -3,33 +3,36 @@ body
     font-family: Roboto;
     height:100%;
     width:100%;
-    min-height:100%;
-    max-height:100%;
     margin:0px;
 }
 
 .grid-layout
 {
     display: grid;
-    width:100%;
-    height:100%;
+    width:80%;
+    height:80%;
     position:fixed;
-    grid-template-columns: 20% 80%;
-    grid-auto-rows: 10% 80% 10%;
+    margin: 5% 0% 0% 10%;
+    background-color: #999999;
+    grid-template-columns: 300px calc(100% - 300px);
+    gap: 1px 1px;
+    grid-auto-rows: 80px calc(100% - 130px) 50px;
 }
 
 .grid-user-profile
 {
-    background: #182229;
+    background: #202c33;
     grid-column: 1;
     grid-row: 1;
+    padding: 15px 15px 15px 15px;
 }
 
 .grid-chat-profile
 {
-    background: #182229;
+    background: #202c33;
     grid-column: 2;
     grid-row: 1;
+    padding: 15px 15px 15px 15px;
 }
 
 .grid-chats
@@ -37,29 +40,44 @@ body
     background: #111b21;
     grid-column: 1;
     grid-row: 2/4;
+    padding: 15px 15px 15px 15px;
 }
 
 .grid-current-chat
 {
     display: flex;
+    flex-direction: column;
     background: #111b21;
     grid-column: 2;
     grid-row: 2;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.grid-current-chat .fix 
+{
+    flex: 1 1 auto;
 }
 
 .grid-input
 {
-    background: #111b21;
+    background: #202c33;
     grid-column: 2;
     grid-row: 3;
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
 
 .input-box
 {
-    width: 80%;
-    padding: 5px;
-    background-color: white;
+    color: white;
+    background-color: #2a3942;
     border-radius: 5px;
+    height: 35px;
+    width: 80%;
+    margin-left: 10%;
+    margin-right: 10%;
+    padding-left: 2%;
 }
 
 .icon
@@ -67,9 +85,7 @@ body
     width:50px;
     height:50px;
     border-radius:100%;
-    margin-right:20px;
-    margin-left:20px;
-    margin-top:20px;
+    margin-right:15px;
 }
 
 .text
@@ -78,15 +94,30 @@ body
     display:inline-block;
 }
 
-.message-box
+.user-message-box
 {
-    background-color:aqua;
-    display:inline-block;
-    align-self:flex-end;
-    margin-left:40%;
-    width:60%;
-    padding: 5px 5px 0px 0px;
+    color: white;
+    background-color: #247278;
+    margin: 0% 5% 2% auto;
+    max-width: 55%;
+    padding: 10px 10px 10px 10px;
+    border-radius: 8px 0px 8px 8px;
+}
+
+.contacts-message-box
+{
+    color:white;
+    background-color: #423333;
+    margin: 0% auto 2% 5%;
+    max-width: 55%;
+    padding: 10px 10px 10px 10px;
     border-radius: 0px 8px 8px 8px;
+}
+
+.message
+{
+    max-width: 100%;
+    word-wrap: break-word;
 }
 
 #main

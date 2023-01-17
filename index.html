@@ -11,29 +11,39 @@
 <body>
     <div id="main">
         <div class="grid-layout">
-            <div class="grid-user-profile"> 
+            <div id="user_profile" class="grid-user-profile"> 
                 <img src="icon2.jpg" alt="Prueba" class="icon">
-                <p class="text" id="username"> Myke </p>
+                <div class="text" id="username"> Myke⛄ </div>
             </div>
-            <div class="grid-chat-profile">
+            <div id="chat_profile" class="grid-chat-profile">
                 <img src="icon1.jpg" alt="Prueba" class="icon">
-                <p class="text" id="chat-username"> Jake </p>
+                <div class="text" id="chat-username"> Zero2🍑 </div>
             </div>
-            <div class="grid-chats">
+            <div id="chats" class="grid-chats">
                <div id="chat1">
                 <img src="icon1.jpg" alt="Prueba" class="icon">
-                <p class="text" id="current-chat-username"> Jake </p>
+                <div class="text" id="current-chat-username"> Zero2🍑 </div>
                </div>
             </div>
-            <div id="current-chat" class="grid-current-chat"> 
-                <div class="message-box">
-                    <p style="color:white"> Hello, how are you? </p>
+            <div id="current-chat" class="grid-current-chat">
+                <div class="fix"></div>
+                <div class="contacts-message-box">
+                    <div class="message"> Heyy, honey💞 </div>
+                </div>
+                <div class="contacts-message-box">
+                    <div class="message"> Do you feel like eating out tonight?😋 </div>
                 </div>
             </div>
             <div class="grid-input"> 
-                <input class="input-box">
+                <input class="input-box" placeholder="Start typing some message">
             </div>
         </div>
+
+        <!--- Templates -->
+        <div style="display:none" id="message-template" class="user-message-box">
+            <div class="message"> </div>
+        </div>
+        
     </div>
 
     <script src="code.js"></script>
