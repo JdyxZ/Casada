@@ -1,14 +1,21 @@
 var MYCHAT =
 {
+	input: null,
+	chat_search_bar: null,
+
 	init:function()
 	{
-        var input = MYCHAT.Q(".input-box");
+		// Search a chat
+		chat_search_bar = MYCHAT.Q(".search-bar");
+		chat_search_bar.addEventListener("keydown", MYCHAT.filterChats)
+
+		//Send a message
+        input = MYCHAT.Q(".input-box");
 		input.addEventListener("keydown", MYCHAT.onKeyPressed);
 	},
 
 	onKeyPressed: function(event)
 	{
-
 		if(event.code == "Enter")
         {
             MYCHAT.sendMessage();
@@ -43,6 +50,12 @@ var MYCHAT =
 
 		// Clean input box
 		input.value = ''
+	},
+
+	filterChats:function()
+	{
+		var query = chat_search_bar.value;
+		console.log(query);
 	},
 
 	changeRoom:function()
