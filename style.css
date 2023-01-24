@@ -2,8 +2,8 @@
 
 :root
 {
-    --screen_height: 864;
-    --screen_width: 1536;
+    --screen_height: 864px;
+    --screen_width: 1536px;
 }
 
 /*GENERAL SETTINGS*/
@@ -53,11 +53,11 @@ body
     position: absolute;
     width: 90%;
     height: 90%;
-    min-width: calc(var(--screen_width) * 0.5px);
-    min-height: calc(var(--screen_width) * 0.25px);
+    min-width: calc(var(--screen_width) * 0.5);
+    min-height: calc(var(--screen_width) * 0.25);
     margin: 2% 5% 2% 5%;
-    grid-template-columns: minmax(calc(var(--screen_width) * 0.2px), 30%) auto;
-    grid-template-rows: minmax(calc(var(--screen_height) * 0.08px), 12%) auto minmax(calc(var(--screen_height) * 0.065px), 8%);
+    grid-template-columns: minmax(calc(var(--screen_width) * 0.2), 30%) auto;
+    grid-template-rows: minmax(calc(var(--screen_height) * 0.08), 12%) auto minmax(calc(var(--screen_height) * 0.065), 8%);
     background-color: #999999;
 }
 

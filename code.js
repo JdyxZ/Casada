@@ -1,6 +1,7 @@
 var MYCHAT =
 {
 	input: null,
+	root: document.documentElement,
 	emoji_picker: new EmojiKeyboard,
 	chat_search_bar: null,
 
@@ -8,6 +9,10 @@ var MYCHAT =
 	{
 		//Input box
 		input = MYCHAT.Q(".input-box");
+
+		// CSS variables
+		document.documentElement.style.setProperty('--screen_width', window.screen.width + "px");
+		document.documentElement.style.setProperty('--screen_height', window.screen.height + "px");
 
 		// Search a chat
 		chat_search_bar = MYCHAT.Q(".search-bar");
