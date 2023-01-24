@@ -1,25 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>Casada</title>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link href="style.css" rel="stylesheet"/>
-    <title>Casada</title>
+
+    <!-- Emoji Picker-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.js"></script>
+    <script src="emoji_keyboard.js"></script>
+    <link rel="stylesheet" href="emoji_keyboard.css">
 </head>
 <body>
     <div id="main">
         <div class="grid-layout">
             <div id="user_profile" class="grid-user-profile"> 
-                <img src="icon2.jpg" alt="Prueba" class="icon">
+                <img src="icon2.jpg" alt="Prueba" class="avatar">
                 <div class="text" id="username"> Myke⛄ </div>
             </div>
             <div id="chat_profile" class="grid-chat-profile">
-                <img src="icon1.jpg" alt="Prueba" class="icon" style="margin-left:2%">
+                <img src="icon1.jpg" alt="Prueba" class="avatar" style="margin-left:2%">
                 <div class="current-chat-info">
-                    <div id="chat-username" class="text"> Zero2🍑 </div>
-                    <div id="chat-status" class="light-text"> Status</div>
+                    <div id="current-chat-username" class="text"> Zero2🍑 </div>
+                    <div id="current-chat-status" class="light-text"> Status</div>
                 </div>
             </div>
             <div id="chats" class="grid-chats">
@@ -27,70 +33,70 @@
                     <input class="search-bar" placeholder="Search for a chat...">
                 </div>
                 <div id="chat1" class="chat">
-                    <img src="icon1.jpg" alt="Prueba" class="icon">
+                    <img src="icon1.jpg" alt="Prueba" class="avatar">
                     <div class="chat-info">
                         <div id="chat-info-username" class="text"> Zero2🍑 </div>
                         <div id="chat-info-last-message" class="light-text"> Last sent message</div>
                     </div>
                 </div>
                 <div id="chat1" class="chat">
-                    <img src="icon1.jpg" alt="Prueba" class="icon">
+                    <img src="icon1.jpg" alt="Prueba" class="avatar">
                     <div class="chat-info">
                         <div id="chat-info-username" class="text"> Zero3🍑 </div>
                         <div id="chat-info-last-message" class="light-text"> Last sent message</div>
                     </div>
                 </div>
                 <div id="chat1" class="chat">
-                    <img src="icon1.jpg" alt="Prueba" class="icon">
+                    <img src="icon1.jpg" alt="Prueba" class="avatar">
                     <div class="chat-info">
                         <div id="chat-info-username" class="text"> Zero4🍑 </div>
                         <div id="chat-info-last-message" class="light-text"> Last sent message</div>
                     </div>
                 </div>
                 <div id="chat1" class="chat">
-                    <img src="icon1.jpg" alt="Prueba" class="icon">
+                    <img src="icon1.jpg" alt="Prueba" class="avatar">
                     <div class="chat-info">
                         <div id="chat-info-username" class="text"> Zero5🍑 </div>
                         <div id="chat-info-last-message" class="light-text"> Last sent message</div>
                     </div>
                 </div>
                 <div id="chat1" class="chat">
-                    <img src="icon1.jpg" alt="Prueba" class="icon">
+                    <img src="icon1.jpg" alt="Prueba" class="avatar">
                     <div class="chat-info">
                         <div id="chat-info-username" class="text"> Zero6🍑 </div>
                         <div id="chat-info-last-message" class="light-text"> Last sent message</div>
                     </div>
                 </div>
                 <div id="chat1" class="chat">
-                    <img src="icon1.jpg" alt="Prueba" class="icon">
+                    <img src="icon1.jpg" alt="Prueba" class="avatar">
                     <div class="chat-info">
                         <div id="chat-info-username" class="text"> Zero7🍑 </div>
                         <div id="chat-info-last-message" class="light-text"> Last sent message</div>
                     </div>
                 </div>
                 <div id="chat1" class="chat">
-                    <img src="icon1.jpg" alt="Prueba" class="icon">
+                    <img src="icon1.jpg" alt="Prueba" class="avatar">
                     <div class="chat-info">
                         <div id="chat-info-username" class="text"> Zero8🍑 </div>
                         <div id="chat-info-last-message" class="light-text"> Last sent message</div>
                     </div>
                 </div>
                 <div id="chat1" class="chat">
-                    <img src="icon1.jpg" alt="Prueba" class="icon">
+                    <img src="icon1.jpg" alt="Prueba" class="avatar">
                     <div class="chat-info">
                         <div id="chat-info-username" class="text"> Zero9🍑 </div>
                         <div id="chat-info-last-message" class="light-text"> Last sent message</div>
                     </div>
                 </div>
                 <div id="chat1" class="chat">
-                    <img src="icon1.jpg" alt="Prueba" class="icon">
+                    <img src="icon1.jpg" alt="Prueba" class="avatar">
                     <div class="chat-info">
                         <div id="chat-info-username" class="text"> Zero10🍑 </div>
                         <div id="chat-info-last-message" class="light-text"> Last sent message</div>
                     </div>
                 </div>
                 <div id="chat1" class="chat">
-                    <img src="icon1.jpg" alt="Prueba" class="icon">
+                    <img src="icon1.jpg" alt="Prueba" class="avatar">
                     <div class="chat-info">
                         <div id="chat-info-username" class="text"> Zero11🍑 </div>
                         <div id="chat-info-last-message" class="light-text"> Last sent message</div>
@@ -100,21 +106,28 @@
             </div>
             <div id="current-chat" class="grid-current-chat">
                 <div class="fix"></div>
-                <div class="contacts-message-box">
-                    <div class="message"> Heyy, honey💞 </div>
+                <div class="status-message-box">
+                    <div class="status-message"> Conversation created the 12/04/2021</div>
                 </div>
                 <div class="contacts-message-box">
-                    <div class="message"> Do you feel like eating out tonight?😋 </div>
+                    <div class="message-content"> Heyy, honey💞 </div>
+                    <div class="message-time light-text"> 10:41 </div>
+                </div>
+                <div class="contacts-message-box">
+                    <div class="message-content"> Do you feel like eating out tonight?😋 </div>
+                    <div class="message-time light-text"> 10:42 </div>
                 </div>
             </div>
             <div class="grid-input"> 
+                <img src="emoji_picker.png" alt="Emoji Picker" id="emoji-picker" class="emoji-icon">
                 <input class="input-box" placeholder="Start typing some message">
             </div>
         </div>
 
         <!--- Templates -->
         <div style="display:none" id="message-template" class="user-message-box">
-            <div class="message"> </div>
+            <div class="message-content"> </div>
+            <div class="message-time" style="color:rgb(207,207,207)"> </div>
         </div>
         
     </div>
