@@ -8,9 +8,9 @@
     height: 50vh;
     width: 30vw;
     position: relative;
-    z-index: 2;
-    margin-left: 3vw;
-    bottom: 60vh;
+    z-index: 1;
+    margin-left: calc(var(--screen_width) * 0.015);
+    bottom: calc(var(--screen_height) * 0.535);
     user-select: none;
     font-family: 'Roboto', 'Whitney', 'Catamaran', 'Helvetica Neue', sans-serif;
 }

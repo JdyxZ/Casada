@@ -57,7 +57,7 @@ body
     min-height: calc(var(--screen_width) * 0.25);
     margin: 2% 5% 2% 5%;
     grid-template-columns: minmax(calc(var(--screen_width) * 0.2), 30%) auto;
-    grid-template-rows: minmax(calc(var(--screen_height) * 0.08), 12%) auto minmax(calc(var(--screen_height) * 0.065), 8%);
+    grid-template-rows: minmax(calc(var(--screen_height) * 0.08), 8.5vh) auto minmax(calc(var(--screen_height) * 0.055), 4vh);
     background-color: #999999;
 }
 
@@ -67,7 +67,7 @@ body
     grid-column: 1;
     grid-row: 1;
     padding: 15px 15px 15px 15px;
-    margin-right: 0.02cm;
+    margin-right: 0.025cm;
 }
 
 .grid-chat-profile
@@ -84,7 +84,7 @@ body
     grid-column: 1;
     grid-row: 2/4;
     padding: 4% 0px 0px 4%;
-    margin-right: 0.02cm;
+    margin-right: 0.025cm;
     overflow-y: auto;
     direction: rtl;
 }

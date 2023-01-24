@@ -9,6 +9,7 @@
 - Room and Avatar pick menu (with icon in user profile)
 - SillyServer
 - Chat status messages ⏸
+- init_base_emojis() -> handle exceptions
 - Conversation messages search bar
 - Unread message status
 - Checked message

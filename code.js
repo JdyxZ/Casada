@@ -11,15 +11,15 @@ var MYCHAT =
 		input = MYCHAT.Q(".input-box");
 
 		// CSS variables
-		document.documentElement.style.setProperty('--screen_width', window.screen.width + "px");
-		document.documentElement.style.setProperty('--screen_height', window.screen.height + "px");
+		document.documentElement.style.setProperty('--screen_width', window.screen.availWidth + "px");
+		document.documentElement.style.setProperty('--screen_height', window.screen.availHeight + "px");
 
 		// Search a chat
 		chat_search_bar = MYCHAT.Q(".search-bar");
 		chat_search_bar.addEventListener("keydown", MYCHAT.filterChats)
 
 		//Emoji picker
-		MYCHAT.emoji_picker.resizable = true;
+		MYCHAT.emoji_picker.resizable = false;
 		MYCHAT.emoji_picker.default_placeholder = "Search an emoji...";
 		MYCHAT.emoji_picker.instantiate(MYCHAT.Q("#emoji-picker"));
 
