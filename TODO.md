@@ -16,3 +16,5 @@
 - Group messages
 - Custom overflow bar
 - Sort chats based on the most recent message (with animation?).
+- Change selectors.
+- Put "avatar" in the alt of icons.
