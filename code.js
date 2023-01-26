@@ -3,24 +3,34 @@ var MYCHAT =
 	input: null,
 	root: document.documentElement,
 	emoji_picker: new EmojiKeyboard,
+	search_bar_box: null,
 	chat_search_bar: null,
+	eraser: null,
 	chats: null,
 
 	init:function()
 	{
-		//Input box
+		//JS variables
 		input = MYCHAT.Q("#chat-input");
+		search_bar_box = MYCHAT.Q(".search-bar-box");
+		chat_search_bar = MYCHAT.Q("#chat-search-bar");
+		eraser = MYCHAT.Q("#eraser");
+		chats = document.querySelectorAll("#chats > div");
 
 		// CSS variables
 		document.documentElement.style.setProperty('--screen_width', window.screen.availWidth + "px");
 		document.documentElement.style.setProperty('--screen_height', window.screen.availHeight + "px");
 
 		// Search a chat
-		chat_search_bar = MYCHAT.Q("#chat-search-bar");
 		chat_search_bar.addEventListener("keyup", MYCHAT.onKeyUp);
 
+		// Erase search
+		eraser.addEventListener("click", () =>{
+			chat_search_bar.value = "";
+			chats.forEach( (element) => { element.style.display = ""; });
+		});
+
 		//Select a chat
-		chats = MYCHAT.Q("#chats");
 		chats.addEventListener("click", MYCHAT.selectChat);
 
 		//Emoji picker
@@ -45,8 +55,7 @@ var MYCHAT =
 		if(event.code == "Escape")
 		{
 			MYCHAT.hideEmojiPicker();
-		}
-		 
+		}	 
 		
 	},
 
@@ -94,10 +103,20 @@ var MYCHAT =
 	{
 		const query = chat_search_bar.value;
 		const regex = new RegExp(query, "i");
-		const chats = document.querySelectorAll("#chats > div");
 
-		console.log(chats);
+		//Cross icon transition
+		if(chat_search_bar.value.length > 0)
+		{
+			eraser.className = "eraser-showing";
+			search_bar_box.style.marginBottom = "-9px";
+		}
+		else
+		{
+			eraser.className = "eraser-hidden";
+			search_bar_box.style.marginBottom = "10px";
+		}
 
+		//Filter chats
 		chats.forEach(function(element){
 
 			if(query.length == 0)
@@ -148,14 +167,17 @@ var MYCHAT =
 
 	emojiPickerInit:function()
 	{
+		//Chat setup
 		MYCHAT.emoji_picker.resizable = false;
 		MYCHAT.emoji_picker.default_placeholder = "Search an emoji...";
 		MYCHAT.emoji_picker.instantiate(MYCHAT.Q("#emoji-picker"));
-
+		
+		//Chat callback
         MYCHAT.emoji_picker.callback = (emoji, closed) => {
             input.value += emoji.emoji;
         };
 
+		//Event listeners
 		MYCHAT.Q(".grid-user-profile").addEventListener("click", MYCHAT.hideEmojiPicker);
 		MYCHAT.Q(".grid-chat-profile").addEventListener("click", MYCHAT.hideEmojiPicker);
 		MYCHAT.Q(".grid-chats").addEventListener("click", MYCHAT.hideEmojiPicker);

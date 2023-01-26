@@ -150,29 +150,52 @@ body
 
 .search-bar-box
 {
-    margin-left: 14%;
+    margin-left: 5%;
     margin-right: 2%;
-    margin-bottom: -10px;
+    margin-bottom: 10px;
     margin-top: 15px;
 }
 
 #chat-search-bar
 {
     color: white;
-    background: url("loupe_icon.png") no-repeat left;
+    background: url("loupe_icon.png") left;
+    background-repeat: no-repeat;
     background-size: 10%;
     background-position: -14%;
     background-origin: content-box;
     background-color: var(--light1-dark-color);
     border-radius: 20px;
+    width: -webkit-fill-available;
     height: 35px;
-    width: 86%;
     padding-left: 15%;
     padding-right: 5%;
-    margin-bottom: 8%;
+    margin-bottom: 3%;
     margin-right: 3.5%;
     direction: ltr;
+    transition: all 2s;
 }
+
+.eraser-hidden
+{
+    display: none;
+    opacity: 0;
+    height: 13px;
+    width: 13px;
+    position: relative;
+    transform: translate(-30px, -42px);
+    margin-bottom: 20em;
+}
+
+.eraser-showing
+{
+    height: 13px;
+    width: 13px;
+    position: relative;
+    transform: translate(-30px, -42px);
+}
+
+
 
 #chats
 {
