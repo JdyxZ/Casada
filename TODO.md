@@ -3,18 +3,20 @@
 ## TODO
 - Emojis picker✅
 - Gradient background message ✅
-- Chat search bar ⏸
 - Añadir el JS de screen_width, screen_height ✅
-- Chat hover animation
-- Room and Avatar pick menu (with icon in user profile)
-- SillyServer
-- Chat status messages ⏸
-- init_base_emojis() -> handle exceptions
-- Conversation messages search bar
-- Unread message status
-- Checked message
-- Group messages
-- Custom overflow bar
-- Sort chats based on the most recent message (with animation?).
+- Chat hover animation ✅
+- Chat status messages ✅
+- Put "avatar" in the alt of icons.✅
+- Create a div for the border of each chat. ✅
+- Use variables for the color palette.✅
+- Chat search bar ⏸
+- Room and Avatar pick menu (with icon in user profile).
 - Change selectors.
-- Put "avatar" in the alt of icons.
+- Custom overflow bar.
+- init_base_emojis() -> handle exceptions.
+- Conversation messages search bar.
+- SillyServer.
+- Unread message status.
+- Group conversation messages.
+- Sort chats based on the most recent message (with animation?).
+- Checked message.

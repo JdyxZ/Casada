@@ -4,6 +4,7 @@ var MYCHAT =
 	root: document.documentElement,
 	emoji_picker: new EmojiKeyboard,
 	chat_search_bar: null,
+	chats: null,
 
 	init:function()
 	{
@@ -16,7 +17,11 @@ var MYCHAT =
 
 		// Search a chat
 		chat_search_bar = MYCHAT.Q(".search-bar");
-		chat_search_bar.addEventListener("keydown", MYCHAT.filterChats)
+		chat_search_bar.addEventListener("keydown", MYCHAT.filterChats);
+
+		//Select a chat
+		chats = MYCHAT.Q("#chats");
+		chats.addEventListener("click", MYCHAT.selectChat);
 
 		//Emoji picker
 		MYCHAT.emoji_picker.resizable = false;
@@ -88,6 +93,30 @@ var MYCHAT =
 	{
 		var query = chat_search_bar.value;
 		console.log(query);
+	},
+
+	selectChat:function(event)
+	{
+		selected_chat = MYCHAT.Q(".selected-chat");
+		const regex = /chat[1-9]+/;
+		
+		for (const element of event.path)
+		{
+			if(element.id != undefined && element.id.match(regex) != null)
+			{
+				console.log(selected_chat)
+				//Swap current selected chat to not selected
+				selected_chat.className = "chat";
+				selected_chat.querySelector("#chat-info-footer").style.display = "";
+
+				//Select the clicked chat
+				element.className = "selected-chat";
+				element.querySelector("#chat-info-footer").style.display = "none";
+
+				//End execution
+				break;
+			}
+		}
 	},
 
 	changeRoom:function()

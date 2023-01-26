@@ -355,7 +355,7 @@ class EmojiKeyboard {
         div2.appendChild(div3);
         main_div.appendChild(search_div);
         main_div.appendChild(div2);
-        document.querySelector(".grid-input").appendChild(main_div);
+        document.querySelector("div .grid-input").appendChild(main_div);
     }
 
     // ----- resizes part ----- //
