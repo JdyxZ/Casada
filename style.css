@@ -75,7 +75,7 @@ body
     grid-column: 1;
     grid-row: 1;
     padding: 15px 15px 15px 15px;
-    margin-right: 0.025cm;
+    margin-right: 0.03cm;
 }
 
 .grid-chat-profile
@@ -91,7 +91,7 @@ body
     background-color: var(--dark-color);
     grid-column: 1;
     grid-row: 2/4;
-    margin-right: 0.025cm;
+    margin-right: 0.03cm;
     overflow-y: auto;
     direction: rtl;
 }

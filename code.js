@@ -6,6 +6,7 @@ var MYCHAT =
 	search_bar_box: null,
 	chat_search_bar: null,
 	eraser: null,
+	chats_div: null,
 	chats: null,
 
 	init:function()
@@ -15,6 +16,7 @@ var MYCHAT =
 		search_bar_box = MYCHAT.Q(".search-bar-box");
 		chat_search_bar = MYCHAT.Q("#chat-search-bar");
 		eraser = MYCHAT.Q("#eraser");
+		chats_div = document.querySelector("#chats");
 		chats = document.querySelectorAll("#chats > div");
 
 		// CSS variables
@@ -31,7 +33,7 @@ var MYCHAT =
 		});
 
 		//Select a chat
-		chats.addEventListener("click", MYCHAT.selectChat);
+		chats_div.addEventListener("click", MYCHAT.selectChat);
 
 		//Emoji picker
 		MYCHAT.emojiPickerInit();
