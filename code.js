@@ -9,53 +9,54 @@ var MYCHAT =
 	init:function()
 	{
 		//Input box
-		input = MYCHAT.Q(".input-box");
+		input = MYCHAT.Q("#chat-input");
 
 		// CSS variables
 		document.documentElement.style.setProperty('--screen_width', window.screen.availWidth + "px");
 		document.documentElement.style.setProperty('--screen_height', window.screen.availHeight + "px");
 
 		// Search a chat
-		chat_search_bar = MYCHAT.Q(".search-bar");
-		chat_search_bar.addEventListener("keydown", MYCHAT.filterChats);
+		chat_search_bar = MYCHAT.Q("#chat-search-bar");
+		chat_search_bar.addEventListener("keyup", MYCHAT.onKeyUp);
 
 		//Select a chat
 		chats = MYCHAT.Q("#chats");
 		chats.addEventListener("click", MYCHAT.selectChat);
 
 		//Emoji picker
-		MYCHAT.emoji_picker.resizable = false;
-		MYCHAT.emoji_picker.default_placeholder = "Search an emoji...";
-		MYCHAT.emoji_picker.instantiate(MYCHAT.Q("#emoji-picker"));
-
-        MYCHAT.emoji_picker.callback = (emoji, closed) => {
-            input.value += emoji.emoji;
-        };
-
-		MYCHAT.Q(".grid-user-profile").addEventListener("click", MYCHAT.hideEmojiPicker);
-		MYCHAT.Q(".grid-chat-profile").addEventListener("click", MYCHAT.hideEmojiPicker);
-		MYCHAT.Q(".grid-chats").addEventListener("click", MYCHAT.hideEmojiPicker);
-		MYCHAT.Q(".grid-current-chat").addEventListener("click", MYCHAT.hideEmojiPicker);
-		MYCHAT.Q("#grid-layout").addEventListener("click", MYCHAT.hideEmojiPicker);
-		document.addEventListener("keydown", MYCHAT.onKeyPressed);
-
+		MYCHAT.emojiPickerInit();
+		
 		//Send a message
-        input = MYCHAT.Q(".input-box");
-		input.addEventListener("keydown", MYCHAT.onKeyPressed);
+		input.addEventListener("keydown", MYCHAT.onKeyDown);
 	},
 
-	onKeyPressed: function(event)
+	onKeyDown: function(event)
 	{
-		//console.log(event.code);
-
-		if(event.code == "Enter")
-        {
-            MYCHAT.sendMessage();
-        } 
-		else if(event.code == "Escape")
+		//console.log(event.key);
+		
+		if(this.id == "chat-input")
+		{
+			if(event.code == "Enter")
+			{
+				MYCHAT.sendMessage();
+			}
+		}
+		
+		if(event.code == "Escape")
 		{
 			MYCHAT.hideEmojiPicker();
 		}
+		 
+		
+	},
+
+	onKeyUp: function(event)
+	{
+		if(this.id == "chat-search-bar")
+		{
+			MYCHAT.filterChats();
+		}
+
 	},
 
 	sendMessage: function()
@@ -91,8 +92,34 @@ var MYCHAT =
 
 	filterChats:function()
 	{
-		var query = chat_search_bar.value;
-		console.log(query);
+		const query = chat_search_bar.value;
+		const regex = new RegExp(query, "i");
+		const chats = document.querySelectorAll("#chats > div");
+
+		console.log(chats);
+
+		chats.forEach(function(element){
+
+			if(query.length == 0)
+			{
+				element.style.display = "";
+			}
+			else
+			{
+				const username = element.querySelector("#chat-info-username").innerText;
+				const last_message = element.querySelector("#chat-info-last-message").innerText;
+	
+				if(regex.test(username) || regex.test(last_message))
+				{
+					element.style.display = "";
+				}
+				else
+				{
+					element.style.display = "none";
+				}
+			}
+		});
+
 	},
 
 	selectChat:function(event)
@@ -117,6 +144,24 @@ var MYCHAT =
 				break;
 			}
 		}
+	},
+
+	emojiPickerInit:function()
+	{
+		MYCHAT.emoji_picker.resizable = false;
+		MYCHAT.emoji_picker.default_placeholder = "Search an emoji...";
+		MYCHAT.emoji_picker.instantiate(MYCHAT.Q("#emoji-picker"));
+
+        MYCHAT.emoji_picker.callback = (emoji, closed) => {
+            input.value += emoji.emoji;
+        };
+
+		MYCHAT.Q(".grid-user-profile").addEventListener("click", MYCHAT.hideEmojiPicker);
+		MYCHAT.Q(".grid-chat-profile").addEventListener("click", MYCHAT.hideEmojiPicker);
+		MYCHAT.Q(".grid-chats").addEventListener("click", MYCHAT.hideEmojiPicker);
+		MYCHAT.Q(".grid-current-chat").addEventListener("click", MYCHAT.hideEmojiPicker);
+		MYCHAT.Q("#grid-layout").addEventListener("click", MYCHAT.hideEmojiPicker);
+		document.addEventListener("keydown", MYCHAT.onKeyDown);
 	},
 
 	changeRoom:function()

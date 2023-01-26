@@ -64,7 +64,7 @@ body
     min-width: calc(var(--screen_width) * 0.5);
     min-height: calc(var(--screen_width) * 0.25);
     margin: 2% 5% 2% 5%;
-    grid-template-columns: minmax(calc(var(--screen_width) * 0.2), 30%) 1fr;
+    grid-template-columns: minmax(calc(var(--screen_width) * 0.25), 30%) 1fr;
     grid-template-rows: auto 1fr minmax(calc(var(--screen_height) * 0.055), 4vh); /*PANCAKE STACK (with naunces)*/
     background-color: #999999;
 }
@@ -148,7 +148,7 @@ body
 
 /* CHATS */
 
-#chat-search-bar
+.search-bar-box
 {
     margin-left: 14%;
     margin-right: 2%;
@@ -156,10 +156,10 @@ body
     margin-top: 15px;
 }
 
-.search-bar
+#chat-search-bar
 {
     color: white;
-    background: url("loupe-icon.png") no-repeat left;
+    background: url("loupe_icon.png") no-repeat left;
     background-size: 10%;
     background-position: -14%;
     background-origin: content-box;
@@ -295,7 +295,7 @@ body
     /*background-color: #8a8a8a;*/
 }
 
-.input-box
+#chat-input
 {
     display: inherit;
     color: white;
