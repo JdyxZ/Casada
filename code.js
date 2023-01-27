@@ -2,26 +2,44 @@ var MYCHAT =
 {
 	input: null,
 	root: document.documentElement,
+	new_chat_trigger : null,
 	emoji_picker: new EmojiKeyboard,
 	search_bar_box: null,
 	chat_search_bar: null,
 	eraser: null,
 	chats_div: null,
 	chats: null,
+	menu: null,
+	menu_grid: null,
+	menu_dragger: null,
+	menu_options: null,
+	clamp: null,
+	available_height: null,
+	available_width: null,
 
 	init:function()
 	{
-		//JS variables
+		// JS variables
 		input = MYCHAT.Q("#chat-input");
+		new_chat_trigger = MYCHAT.Q("#new-chat-trigger");
 		search_bar_box = MYCHAT.Q(".search-bar-box");
 		chat_search_bar = MYCHAT.Q("#chat-search-bar");
 		eraser = MYCHAT.Q("#eraser");
-		chats_div = document.querySelector("#chats");
+		chats_div = MYCHAT.Q("#chats");
 		chats = document.querySelectorAll("#chats > div");
+		menu = MYCHAT.Q("#menu");
+		menu_grid = MYCHAT.Q(".menu-grid");
+		menu_dragger = MYCHAT.Q("#menu-dragger");
+		menu_options = MYCHAT.Q("#menu-options");
+		available_height = window.screen.availHeight;
+		available_width = window.screen.availWidth;
 
 		// CSS variables
-		document.documentElement.style.setProperty('--screen_width', window.screen.availWidth + "px");
-		document.documentElement.style.setProperty('--screen_height', window.screen.availHeight + "px");
+		document.documentElement.style.setProperty('--screen_width', available_width + "px");
+		document.documentElement.style.setProperty('--screen_height', available_height + "px");
+
+		// Custom methods
+		clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
 		// Search a chat
 		chat_search_bar.addEventListener("keyup", MYCHAT.onKeyUp);
@@ -32,14 +50,23 @@ var MYCHAT =
 			chats.forEach( (element) => { element.style.display = ""; });
 		});
 
-		//Select a chat
+		// Select a chat
 		chats_div.addEventListener("click", MYCHAT.selectChat);
 
-		//Emoji picker
+		// Emoji picker
 		MYCHAT.emojiPickerInit();
 		
-		//Send a message
+		// Send a message
 		input.addEventListener("keydown", MYCHAT.onKeyDown);
+
+		// Menu dragger
+		menu_dragger.addEventListener("mousedown", MYCHAT.dragMenu);
+
+		//Open menu
+		new_chat_trigger.addEventListener("click", () => {menu_grid.style.zIndex = "2";})
+
+		// Close menu
+		menu_options.addEventListener("click", () => {menu_grid.style.zIndex = "0";} );
 	},
 
 	onKeyDown: function(event)
@@ -106,7 +133,7 @@ var MYCHAT =
 		const query = chat_search_bar.value;
 		const regex = new RegExp(query, "i");
 
-		//Cross icon transition
+		// Cross icon transition
 		if(chat_search_bar.value.length > 0)
 		{
 			eraser.className = "eraser-showing";
@@ -118,7 +145,7 @@ var MYCHAT =
 			search_bar_box.style.marginBottom = "10px";
 		}
 
-		//Filter chats
+		// Filter chats
 		chats.forEach(function(element){
 
 			if(query.length == 0)
@@ -169,23 +196,65 @@ var MYCHAT =
 
 	emojiPickerInit:function()
 	{
-		//Chat setup
+		// Chat setup
 		MYCHAT.emoji_picker.resizable = false;
 		MYCHAT.emoji_picker.default_placeholder = "Search an emoji...";
 		MYCHAT.emoji_picker.instantiate(MYCHAT.Q("#emoji-picker"));
 		
-		//Chat callback
+		// Chat callback
         MYCHAT.emoji_picker.callback = (emoji, closed) => {
             input.value += emoji.emoji;
         };
 
-		//Event listeners
+		// Event listeners
 		MYCHAT.Q(".grid-user-profile").addEventListener("click", MYCHAT.hideEmojiPicker);
 		MYCHAT.Q(".grid-chat-profile").addEventListener("click", MYCHAT.hideEmojiPicker);
 		MYCHAT.Q(".grid-chats").addEventListener("click", MYCHAT.hideEmojiPicker);
 		MYCHAT.Q(".grid-current-chat").addEventListener("click", MYCHAT.hideEmojiPicker);
 		MYCHAT.Q("#grid-layout").addEventListener("click", MYCHAT.hideEmojiPicker);
 		document.addEventListener("keydown", MYCHAT.onKeyDown);
+	},
+
+	dragMenu:function(event)
+	{
+		// Event
+		event = event || window.event;
+		event.preventDefault();
+
+		// Positions
+		var xi, yi, Δx, Δy;
+
+		// Get mouse cursor position at startup
+		xi = event.clientX;
+		yi = event.clientY;
+
+		// Track mouse motion to perform the transition
+		document.onmousemove = (event) => {
+
+			// Event
+			event = event || window.event;
+			event.preventDefault();
+
+			// Displacement
+			Δx = event.clientX - xi;
+			Δy = event.clientY - yi;
+
+			// Set div new position
+			menu.style.left = clamp((menu.offsetLeft + Δx), 0, available_width - available_width * 0.3 - 50) + "px";
+			menu.style.top = clamp((menu.offsetTop + Δy), 0, available_height - available_height * 0.6 - 80) + "px";
+			
+			//Update intial potition to current potition
+			xi = event.clientX;
+			yi = event.clientY;
+
+		};
+
+		// Stop moving when the mouse is released
+		document.onmouseup = () => {
+
+			document.onmouseup = null;
+			document.onmousemove = null;
+		}
 	},
 
 	changeRoom:function()

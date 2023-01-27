@@ -11,5 +11,9 @@ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expression
 https://stackoverflow.com/questions/195951/how-can-i-change-an-elements-class-with-javascript
 https://stackoverflow.com/questions/9655164/regex-ignore-case-sensitivity 
 https://stackoverflow.com/questions/9070362/multiple-background-images-in-one-div
+https://www.youtube.com/watch?v=qm0IfG1GyZU&t=983s 
+https://www.w3schools.com/howto/howto_js_draggable.asp
+https://stackoverflow.com/questions/62020973/how-do-i-mask-a-div-to-its-parent-dimensions
+https://developer.mozilla.org/es/docs/Web/API/Event/preventDefault 
 
 
