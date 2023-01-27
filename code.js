@@ -25,6 +25,8 @@ var MYCHAT =
 	current_avatar: null,
 	current_nick: null,
 	current_room: null,
+	available_rooms: null,
+	rooms_datalist: null,
 
 	init:function()
 	{
@@ -50,7 +52,9 @@ var MYCHAT =
 		apply_changes = MYCHAT.Q("#apply-changes");
 		current_avatar = MYCHAT.Q("#user-avatar");
 		current_nick = MYCHAT.Q("#username");
-		current_room = 0;
+		current_room = "1234";
+		available_rooms = ["La casa de las cariñosas", "Una sala de fitness peculiar...", "La guarida de la rata", "1234"];
+		rooms_datalist = MYCHAT.Q("#available-rooms");
 
 		// CSS variables
 		document.documentElement.style.setProperty('--screen_width', available_width + "px");
@@ -94,6 +98,9 @@ var MYCHAT =
 
 		// Save setup
 		apply_changes.addEventListener("click", MYCHAT.saveSetup);
+
+		// Load rooms
+		MYCHAT.loadRooms();
 	},
 
 	onKeyDown: function(event)
@@ -285,11 +292,16 @@ var MYCHAT =
 
 	openMenu:function()
 	{
+		// Load menu
 		menu_grid.style.zIndex = "2";
 		menu_grid.style.display = "";
 
 		menu.style.left = (available_width - menu.offsetWidth) / 2 + "px";
 		menu.style.top = (available_height - menu.offsetHeight) / 2 + "px";
+
+		// Load available rooms
+		MYCHAT.loadRooms();
+
 	},
 
 	changeAvatar:function()
@@ -314,13 +326,20 @@ var MYCHAT =
 
 	resetSetup:function()
 	{
-		new_avatar.src = "default_avatar.jpg";
+		new_avatar.src = "images/default_avatar.jpg";
 		new_nick.value = "";
 		new_room.value = "";
 	},
 
 	saveSetup:function()
 	{
+		// Check all fields are not empty
+		if(new_nick.value == "") new_nick.style.border = "2px #912626 solid", new_nick.placeholder = "Choose a nick";
+		else new_nick.style.border = "none", new_nick.placeholder = "";
+		if(new_room.value == "") new_room.style.border = "2px #912626 solid", new_room.placeholder = "Choose a room";
+		else new_room.style.border = "none", new_room.placeholder = "";
+		if(new_nick.value == "" || new_room.value == "") return;
+
 		// Save changes
 		current_avatar.src = new_avatar.src;
 		current_nick.innerText = new_nick.value;
@@ -335,10 +354,24 @@ var MYCHAT =
 
 	closeMenu:function()
 	{
+		// Hide menu
 		menu_grid.style.zIndex = "0";
 		menu_grid.style.display = "none";
+
+		// Remove all datalist options
+		rooms_datalist.replaceChildren();
 	},
 
+	loadRooms:function()
+	{
+		for (const room of available_rooms)
+		{
+			const option = document.createElement("option");
+			option.innerText = room;
+
+			rooms_datalist.appendChild(option);
+		}
+	},
 
 	changeRoom:function()
 	{

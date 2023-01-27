@@ -17,6 +17,13 @@ https://stackoverflow.com/questions/62020973/how-do-i-mask-a-div-to-its-parent-d
 https://developer.mozilla.org/es/docs/Web/API/Event/preventDefault 
 https://stackoverflow.com/questions/16080644/customize-the-file-button-for-image-upload
 https://stackoverflow.com/questions/15167545/how-to-crop-a-rectangular-image-into-a-square-with-css 
+https://stackoverflow.com/questions/5650457/html-select-form-with-option-to-enter-custom-value
+https://stackoverflow.com/questions/3010840/loop-through-an-array-in-javascript
+https://stackoverflow.com/questions/3955229/remove-all-child-elements-of-a-dom-node-in-javascript
+https://www.w3schools.com/howto/howto_css_placeholder.asp 
+https://stackoverflow.com/questions/36652580/how-to-add-three-dots-to-text-when-overflow-in-html
+https://stackoverflow.com/questions/45581361/how-can-i-catch-a-404-error-in-javascript
+
 
 
 

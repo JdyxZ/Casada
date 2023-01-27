@@ -9,6 +9,7 @@
     --dark-color: #111b21;
     --light1-dark-color: #202c33;
     --light2-dark-color: #2a3942;
+    --light3-dark-color: #4f545c;
     --chat-info-footer-color: #363636;
     --contacts-message-box-color: #423333;
     --user-message-box-gradient1-color: #df47ac;
@@ -30,12 +31,17 @@
 .text
 {
     color:white;
-    display:inline-block;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .light-text
 {
     color: rgb(134, 133, 133);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 
@@ -43,7 +49,7 @@
 
 body
 {
-    background-image: url("wallpaper_background.jpg");
+    background-image: url("images/wallpaper_background.jpg");
     background-size: cover;
     font-family: Roboto;
     height:100%;
@@ -81,6 +87,9 @@ body
     grid-row: 1;
     padding: 15px 15px 15px 15px;
     margin-right: 0.03cm;
+    overflow: hidden;
+    display:flex;
+    place-content: start;
 }
 
 .grid-chat-profile
@@ -89,6 +98,9 @@ body
     grid-column: 2;
     grid-row: 1;
     padding: 15px 15px 15px 15px;
+    overflow: hidden;
+    display:flex;
+    place-content: start;
 }
 
 .grid-chats
@@ -105,7 +117,7 @@ body
 {
     display: flex;
     flex-direction: column;
-    background-image: url("wallpaper_chat_6.png");
+    background-image: url("images/wallpaper_chat_6.png");
     background-size: cover;
     grid-column: 2;
     grid-row: 2;
@@ -137,31 +149,55 @@ body
     padding-top: 5px;
 }
 
+/* SCROLLBARS  */
+::-webkit-scrollbar 
+{
+    width: 7px;
+}
+  
+::-webkit-scrollbar-track 
+{
+background-color: var(--dark-color);
+border-radius: 25px;
+}
+
+::-webkit-scrollbar-thumb 
+{
+background-color: var(--light2-dark-color);
+border-radius: 25px;
+}
+
+::-webkit-scrollbar-thumb:hover
+{
+background-color: var(--light3-dark-color);
+}
+
 /* USER INFO */
 #username
 {
-    transform: translate(0px, -15px);
+    width: 60%;
+    margin-top:4%;
 }
 
 #new-chat-trigger
 {
-    width: 8%;
+    width: 10%;
     height: auto;
-    object-fit: cover;
-    margin-left: 61%;
-    margin-bottom: 1%;
+    margin-left: 14%;
+    margin-top: 2%;
 }
 
 /* CURRENT CHAT INFO */
 .current-chat-info
 {
-    display: inline-block;
     transform: translate(0px, -3px);
+    overflow: hidden;
 }
 
 #current-chat-username
 {
-    margin-bottom: 10px;
+    margin-top: 5px;
+    margin-bottom: 7px;
 }
 
 #current-chat-status
@@ -182,7 +218,7 @@ body
 #chat-search-bar
 {
     color: white;
-    background: url("loupe_icon.png") left;
+    background: url("images/loupe_icon.png") left;
     background-repeat: no-repeat;
     background-size: 8%;
     background-position: -11%;
@@ -222,12 +258,13 @@ body
 
 #chats
 {
-    height:100%;
-    width: 100%;
+    height: auto;
+    width: auto;
 }
 
 .chat
 {
+    display:flex;
     padding-top: 15px;
     padding-bottom: 15px;
     padding-left: 18px;
@@ -242,6 +279,7 @@ body
 
 .selected-chat
 {
+    display:flex;
     padding-top: 15px;
     padding-bottom: 15px;
     padding-left: 18px;
@@ -252,8 +290,7 @@ body
 .chat-info
 {
     display: inline-block;
-    transform: translate(0px, -3px);
-    width: 80%;
+    width: -webkit-fill-available;
 }
 
 #chat-info-username
@@ -305,7 +342,6 @@ body
 
 .contacts-message-box
 {
-    color:white;
     background-color: var(--contacts-message-box-color);
     margin: 0% auto 10px 5%;
     max-width: 55%;
@@ -315,6 +351,7 @@ body
 
 .message-content
 {
+    color:white;
     display: inline-block;
     max-width: -webkit-fill-available;
     word-wrap: break-word;
@@ -322,6 +359,7 @@ body
 
 .message-time
 {
+    color: rgb(134, 133, 133);
     display: inline-block;
     float: right;
     max-width: max-content;
@@ -433,23 +471,19 @@ body
 
 #avatar-uploader
 {
-    width: 40%;
+    width: 5%;
     height: auto;
-    color: white;
-    font-size: 17px;
-    text-align: center;
-    text-decoration: none;
-    padding: 10px;
-    background-color: var(--featured-color2);
-    border: none;
-    border-radius: 20px;
+    background-color: var(--dark-color);
+    border: solid 10px;
+    border-color: var(--dark-color);
+    border-radius: 100%;
     margin-bottom: 4%;
 }
 
-#menu div[class="text"]
+#menu div[type="text"]
 {
+    color: white;
     font-size: 17px;
-    margin-bottom: 3%;
 }
 
 #menu input[type="text"]
@@ -464,7 +498,13 @@ body
     margin-bottom: 3%;
     border: none;
     border-radius: 20px;
-    transition: all 2s;
+    transition: all 1s;
+}
+
+#menu input[type="text"]::placeholder
+{
+    color: #912626;
+    opacity: 1;
 }
 
 #reset-changes, #apply-changes

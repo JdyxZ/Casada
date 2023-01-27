@@ -11,8 +11,8 @@
     <!-- Emoji Picker-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.js"></script>
-    <script src="emoji_keyboard.js"></script>
-    <link rel="stylesheet" href="emoji_keyboard.css">
+    <script src="components/emoji_keyboard.js"></script>
+    <link rel="stylesheet" href="components/emoji_keyboard.css">
 </head>
 <body>
     <div id="main">
@@ -20,12 +20,12 @@
         <!-- Main Interface -->
         <div class="grid-layout">
             <div id="user_profile" class="grid-user-profile"> 
-                <img src="icon2.jpg" alt="Avatar" class="avatar" id="user-avatar">
+                <img src="images/icon2.jpg" alt="Avatar" class="avatar" id="user-avatar">
                 <div class="text" id="username"> Myke⛄ </div>
-                <img src="new_chat_icon.png" alt="new_chat" id="new-chat-trigger"\>
+                <img src="images/new_chat_icon.png" alt="new_chat" id="new-chat-trigger"\>
             </div>
             <div id="chat_profile" class="grid-chat-profile">
-                <img src="icon1.jpg" alt="Avatar" class="avatar" style="margin-left:2%"\>
+                <img src="images/icon1.jpg" alt="Avatar" class="avatar" style="margin-left:2%"\>
                 <div class="current-chat-info">
                     <div id="current-chat-username" class="text"> Zero2🍑 </div>
                     <div id="current-chat-status" class="light-text"> Status</div>
@@ -34,11 +34,11 @@
             <div class="grid-chats">
                 <div class="search-bar-box">
                     <input id="chat-search-bar" placeholder="Search for a chat..." type="text"\>
-                    <img src="cross_icon.png" alt="cross" id="eraser" class="eraser-hidden"\>
+                    <img src="images/cross_icon.png" alt="cross" id="eraser" class="eraser-hidden"\>
                 </div>
                 <div id="chats">
                     <div id="chat1" class="selected-chat">
-                        <img src="icon1.jpg" alt="Avatar" class="avatar"\>
+                        <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
                         <div class="chat-info">
                             <div id="chat-info-username" class="text"> Zero2🍑 </div>
                             <div id="chat-info-last-message" class="light-text"> Last sent message</div>
@@ -46,7 +46,7 @@
                         </div>
                     </div>
                     <div id="chat2" class="chat">
-                        <img src="icon1.jpg" alt="Avatar" class="avatar"\>
+                        <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
                         <div class="chat-info">
                             <div id="chat-info-username" class="text"> Zero3🍑 </div>
                             <div id="chat-info-last-message" class="light-text"> Last sent message</div>
@@ -54,7 +54,7 @@
                         </div>
                     </div>
                     <div id="chat3" class="chat">
-                        <img src="icon1.jpg" alt="Avatar" class="avatar"\>
+                        <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
                         <div class="chat-info">
                             <div id="chat-info-username" class="text"> Zero4🍑 </div>
                             <div id="chat-info-last-message" class="light-text"> Last sent message</div>
@@ -62,7 +62,7 @@
                         </div>
                     </div>
                     <div id="chat4" class="chat">
-                        <img src="icon1.jpg" alt="Avatar" class="avatar"\>
+                        <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
                         <div class="chat-info">
                             <div id="chat-info-username" class="text"> Zero5🍑 </div>
                             <div id="chat-info-last-message" class="light-text"> Last sent message</div>
@@ -70,7 +70,7 @@
                         </div>
                     </div>
                     <div id="chat5" class="chat">
-                        <img src="icon1.jpg" alt="Avatar" class="avatar"\>
+                        <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
                         <div class="chat-info">
                             <div id="chat-info-username" class="text"> Zero6🍑 </div>
                             <div id="chat-info-last-message" class="light-text"> Last sent message</div>
@@ -78,7 +78,7 @@
                         </div>
                     </div>
                     <div id="chat6" class="chat">
-                        <img src="icon1.jpg" alt="Avatar" class="avatar"\>
+                        <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
                         <div class="chat-info">
                             <div id="chat-info-username" class="text"> Zero7🍑 </div>
                             <div id="chat-info-last-message" class="light-text"> Last sent message</div>
@@ -86,7 +86,7 @@
                         </div>
                     </div>
                     <div id="chat7" class="chat">
-                        <img src="icon1.jpg" alt="Avatar" class="avatar"\>
+                        <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
                         <div class="chat-info">
                             <div id="chat-info-username" class="text"> Zero8🍑 </div>
                             <div id="chat-info-last-message" class="light-text"> Last sent message</div>
@@ -94,7 +94,7 @@
                         </div>
                     </div>
                     <div id="chat8" class="chat">
-                        <img src="icon1.jpg" alt="Avatar" class="avatar"\>
+                        <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
                         <div class="chat-info">
                             <div id="chat-info-username" class="text"> Zero9🍑 </div>
                             <div id="chat-info-last-message" class="light-text"> Last sent message</div>
@@ -102,7 +102,7 @@
                         </div>
                     </div>
                     <div id="chat9" class="chat">
-                        <img src="icon1.jpg" alt="Avatar" class="avatar"\>
+                        <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
                         <div class="chat-info">
                             <div id="chat-info-username" class="text"> Zero10🍑 </div>
                             <div id="chat-info-last-message" class="light-text"> Last sent message</div>
@@ -110,7 +110,7 @@
                         </div>
                     </div>
                     <div id="chat10" class="chat">
-                        <img src="icon1.jpg" alt="Avatar" class="avatar"\>
+                        <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
                         <div class="chat-info">
                             <div id="chat-info-username" class="text"> Zero11🍑 </div>
                             <div id="chat-info-last-message" class="light-text"> Last sent message</div>
@@ -135,10 +135,10 @@
                 </div>
             </div>
             <div class="grid-banner">
-                <img src="casada_logo.png" alt="App Logo" class="casada-logo">
+                <img src="images/casada_logo.png" alt="App Logo" class="casada-logo">
             </div>
             <div class="grid-input"> 
-                <img src="emoji_picker.png" alt="Emoji Picker" id="emoji-picker" class="emoji-icon"\>
+                <img src="images/emoji_picker.png" alt="Emoji Picker" id="emoji-picker" class="emoji-icon"\>
                 <input id="chat-input" placeholder="Start typing some message" type="text"\>
             </div>
         </div>
@@ -148,16 +148,17 @@
             <div id="menu">
                 <div class="menu-banner"> 
                     <div id="menu-dragger"> Setup </div>
-                    <img src="menu_options_icon.png" alt="menu options" id="menu-options"\>
+                    <img src="images/menu_options_icon.png" alt="menu options" id="menu-options"\>
                 </div>
-                <img src="casada_chat_logo.png" alt="casada logo" class="casada-chat-logo"\><br>
-                <img src="default_avatar.jpg" alt="default avatar" id="new-avatar"\><br>
+                <img src="images/casada_chat_logo.png" alt="casada logo" class="casada-chat-logo"\><br>
+                <img src="images/default_avatar.jpg" alt="default avatar" id="new-avatar"\><br>
                 <input type="file"/>
-                <button type="button" id="avatar-uploader"> Upload your avatar </button><br>
-                <div class="text"> Nick </div> <br>
-                <input type="text" id="new-nick"/> <br>
-                <div class="text"> Room </div> <br>
-                <input type="text"id="new-room"/> <br>
+                <img src="images/camera-icon.png" id="avatar-uploader"><br>
+                <div type="text"> Nick </div> <br>
+                <input type="text" id="new-nick"/ onclick="this.placeholder = '', this.style.border= 'none'" maxlength="20"> <br>
+                <div type="text"> Room </div> <br>
+                <input type="text" id="new-room" list="available-rooms" onclick="this.placeholder = '', this.style.border= 'none'"/> 
+                <datalist id="available-rooms"></datalist><br>
                 <button type="button" id="reset-changes"> Reset changes </button>
                 <button type="button" id="apply-changes"> Apply changes </button>
             </div>
