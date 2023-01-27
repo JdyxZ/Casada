@@ -16,6 +16,15 @@ var MYCHAT =
 	clamp: null,
 	available_height: null,
 	available_width: null,
+	avatar_uploader: null,
+	new_avatar: null,
+	new_nick: null,
+	new_room: null,
+	reset_changes: null,
+	apply_changes: null,
+	current_avatar: null,
+	current_nick: null,
+	current_room: null,
 
 	init:function()
 	{
@@ -33,6 +42,15 @@ var MYCHAT =
 		menu_options = MYCHAT.Q("#menu-options");
 		available_height = window.screen.availHeight;
 		available_width = window.screen.availWidth;
+		avatar_uploader = MYCHAT.Q("#avatar-uploader");
+		new_avatar = MYCHAT.Q("#new-avatar");
+		new_nick = MYCHAT.Q("#new-nick");
+		new_room = MYCHAT.Q("#new-room");
+		reset_changes = MYCHAT.Q("#reset-changes");
+		apply_changes = MYCHAT.Q("#apply-changes");
+		current_avatar = MYCHAT.Q("#user-avatar");
+		current_nick = MYCHAT.Q("#username");
+		current_room = 0;
 
 		// CSS variables
 		document.documentElement.style.setProperty('--screen_width', available_width + "px");
@@ -62,11 +80,20 @@ var MYCHAT =
 		// Menu dragger
 		menu_dragger.addEventListener("mousedown", MYCHAT.dragMenu);
 
-		//Open menu
-		new_chat_trigger.addEventListener("click", () => {menu_grid.style.zIndex = "2";})
+		// Open menu
+		new_chat_trigger.addEventListener("click", MYCHAT.openMenu);
 
 		// Close menu
-		menu_options.addEventListener("click", () => {menu_grid.style.zIndex = "0";} );
+		menu_options.addEventListener("click", MYCHAT.closeMenu);
+
+		// Change avatar
+		avatar_uploader.addEventListener("click", MYCHAT.changeAvatar);
+
+		// Reset changes
+		reset_changes.addEventListener("click", MYCHAT.resetSetup);
+
+		// Save setup
+		apply_changes.addEventListener("click", MYCHAT.saveSetup);
 	},
 
 	onKeyDown: function(event)
@@ -179,7 +206,6 @@ var MYCHAT =
 		{
 			if(element.id != undefined && element.id.match(regex) != null)
 			{
-				console.log(selected_chat)
 				//Swap current selected chat to not selected
 				selected_chat.className = "chat";
 				selected_chat.querySelector("#chat-info-footer").style.display = "";
@@ -240,8 +266,8 @@ var MYCHAT =
 			Δy = event.clientY - yi;
 
 			// Set div new position
-			menu.style.left = clamp((menu.offsetLeft + Δx), 0, available_width - available_width * 0.3 - 50) + "px";
-			menu.style.top = clamp((menu.offsetTop + Δy), 0, available_height - available_height * 0.6 - 80) + "px";
+			menu.style.left = clamp((menu.offsetLeft + Δx), 0, available_width - menu.offsetWidth - 50) + "px";
+			menu.style.top = clamp((menu.offsetTop + Δy), 0, available_height - menu.offsetHeight - 80) + "px";
 			
 			//Update intial potition to current potition
 			xi = event.clientX;
@@ -256,6 +282,63 @@ var MYCHAT =
 			document.onmousemove = null;
 		}
 	},
+
+	openMenu:function()
+	{
+		menu_grid.style.zIndex = "2";
+		menu_grid.style.display = "";
+
+		menu.style.left = (available_width - menu.offsetWidth) / 2 + "px";
+		menu.style.top = (available_height - menu.offsetHeight) / 2 + "px";
+	},
+
+	changeAvatar:function()
+	{
+		// File uploader and avatar image
+		file_uploader = MYCHAT.Q("#menu input[type='file']");
+
+		// Launch file manager event
+		file_uploader.click();
+
+		// Change user avatar
+		file_uploader.addEventListener("change", () =>{
+			const reader = new FileReader();
+			reader.readAsDataURL(file_uploader.files[0]);
+			reader.addEventListener("load", () => {
+				new_avatar.src = reader.result;				
+			});
+		});
+
+		
+	},
+
+	resetSetup:function()
+	{
+		new_avatar.src = "default_avatar.jpg";
+		new_nick.value = "";
+		new_room.value = "";
+	},
+
+	saveSetup:function()
+	{
+		// Save changes
+		current_avatar.src = new_avatar.src;
+		current_nick.innerText = new_nick.value;
+		current_room = new_room.value;
+
+		// Reset setup
+		MYCHAT.resetSetup();
+
+		// Close menu
+		MYCHAT.closeMenu();
+	},
+
+	closeMenu:function()
+	{
+		menu_grid.style.zIndex = "0";
+		menu_grid.style.display = "none";
+	},
+
 
 	changeRoom:function()
 	{

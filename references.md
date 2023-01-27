@@ -15,5 +15,8 @@ https://www.youtube.com/watch?v=qm0IfG1GyZU&t=983s
 https://www.w3schools.com/howto/howto_js_draggable.asp
 https://stackoverflow.com/questions/62020973/how-do-i-mask-a-div-to-its-parent-dimensions
 https://developer.mozilla.org/es/docs/Web/API/Event/preventDefault 
+https://stackoverflow.com/questions/16080644/customize-the-file-button-for-image-upload
+https://stackoverflow.com/questions/15167545/how-to-crop-a-rectangular-image-into-a-square-with-css 
+
 
 

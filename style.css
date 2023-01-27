@@ -4,7 +4,8 @@
 {
     --screen_height: 864px;
     --screen_width: 1536px;
-    --featured-color: #154648;
+    --featured-color1: #154648;
+    --featured-color2: #298087;
     --dark-color: #111b21;
     --light1-dark-color: #202c33;
     --light2-dark-color: #2a3942;
@@ -21,6 +22,7 @@
 {
     width:50px;
     height:50px;
+    object-fit: cover;
     border-radius:100%;
     margin-right:15px;
 }
@@ -74,7 +76,7 @@ body
 
 .grid-user-profile
 {
-    background-color: var(--featured-color);
+    background-color: var(--featured-color1);
     grid-column: 1;
     grid-row: 1;
     padding: 15px 15px 15px 15px;
@@ -83,7 +85,7 @@ body
 
 .grid-chat-profile
 {
-    background-color: var(--featured-color);
+    background-color: var(--featured-color1);
     grid-column: 2;
     grid-row: 1;
     padding: 15px 15px 15px 15px;
@@ -93,7 +95,7 @@ body
 {
     background-color: var(--dark-color);
     grid-column: 1;
-    grid-row: 2/4;
+    grid-row: 2;
     margin-right: 0.03cm;
     overflow-y: auto;
     direction: rtl;
@@ -117,6 +119,16 @@ body
     margin-bottom: 3.5%;
 }
 
+.grid-banner
+{
+    display:grid;
+    place-items: center;
+    background-color: var(--light1-dark-color);
+    grid-column: 1;
+    grid-row: 3;
+    margin-right: 0.03cm;
+}
+
 .grid-input
 {
     background-color: var(--light1-dark-color);
@@ -133,8 +145,9 @@ body
 
 #new-chat-trigger
 {
-    width: 7%;
+    width: 8%;
     height: auto;
+    object-fit: cover;
     margin-left: 61%;
     margin-bottom: 1%;
 }
@@ -175,6 +188,7 @@ body
     background-position: -11%;
     background-origin: content-box;
     background-color: var(--light1-dark-color);
+    border:none;
     border-radius: 20px;
     width: -webkit-fill-available;
     height: 35px;
@@ -232,7 +246,7 @@ body
     padding-bottom: 15px;
     padding-left: 18px;
     direction: ltr;
-    background-color: var(--featured-color);
+    background-color: var(--featured-color1);
 }
 
 .chat-info
@@ -316,6 +330,15 @@ body
     transform: translate(0px, 7px);
 }
 
+/*BANNER*/
+.casada-logo
+{
+    width: 40%;
+    height: auto;
+    transform: translate(-10px,-5px);
+}
+
+
 /*INPUT*/
 
 .emoji-icon
@@ -356,7 +379,7 @@ body
 #menu
 {
     position:absolute;
-    height:calc(var(--screen_height) * 0.6);
+    height:calc(var(--screen_height) * 0.7);
     width:calc(var(--screen_width) * 0.3);
     background-color: var(--menu-color);
     border-radius: 5%;
@@ -385,4 +408,89 @@ body
     height: auto;
     transform: translate(-22px, -21px);
 }
+
+.casada-chat-logo
+{
+    width:50%;
+    height: auto;
+    margin-left: 5%;
+    margin-top: 2%;
+}
+
+#new-avatar
+{
+    width:200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 100%;
+    margin-bottom: 3%;
+}
+
+#menu input[type="file"]
+{
+    display:none
+}
+
+#avatar-uploader
+{
+    width: 40%;
+    height: auto;
+    color: white;
+    font-size: 17px;
+    text-align: center;
+    text-decoration: none;
+    padding: 10px;
+    background-color: var(--featured-color2);
+    border: none;
+    border-radius: 20px;
+    margin-bottom: 4%;
+}
+
+#menu div[class="text"]
+{
+    font-size: 17px;
+    margin-bottom: 3%;
+}
+
+#menu input[type="text"]
+{
+    width: 60%;
+    height: auto;
+    color: white;
+    text-align: center;
+    font-size: 17px;
+    background-color: var(--dark-color);
+    padding: 2%;
+    margin-bottom: 3%;
+    border: none;
+    border-radius: 20px;
+    transition: all 2s;
+}
+
+#reset-changes, #apply-changes
+{
+    width: 40%;
+    height: auto;
+    color: white;
+    font-size: 17px;
+    text-align: center;
+    text-decoration: none;
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    margin-top: 5%;
+    margin-bottom: 4%;
+}
+
+#reset-changes
+{
+    background-color: #973131;
+    margin-right: 5%;
+}
+
+#apply-changes
+{
+    background-color: var(--featured-color2);
+}
+
 

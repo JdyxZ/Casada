@@ -16,9 +16,11 @@
 </head>
 <body>
     <div id="main">
+
+        <!-- Main Interface -->
         <div class="grid-layout">
             <div id="user_profile" class="grid-user-profile"> 
-                <img src="icon2.jpg" alt="Avatar" class="avatar">
+                <img src="icon2.jpg" alt="Avatar" class="avatar" id="user-avatar">
                 <div class="text" id="username"> Myke⛄ </div>
                 <img src="new_chat_icon.png" alt="new_chat" id="new-chat-trigger"\>
             </div>
@@ -31,7 +33,7 @@
             </div>
             <div class="grid-chats">
                 <div class="search-bar-box">
-                    <input id="chat-search-bar" placeholder="Search for a chat...">
+                    <input id="chat-search-bar" placeholder="Search for a chat..." type="text"\>
                     <img src="cross_icon.png" alt="cross" id="eraser" class="eraser-hidden"\>
                 </div>
                 <div id="chats">
@@ -132,9 +134,12 @@
                     <div class="message-time light-text"> 10:42 </div>
                 </div>
             </div>
+            <div class="grid-banner">
+                <img src="casada_logo.png" alt="App Logo" class="casada-logo">
+            </div>
             <div class="grid-input"> 
                 <img src="emoji_picker.png" alt="Emoji Picker" id="emoji-picker" class="emoji-icon"\>
-                <input id="chat-input" placeholder="Start typing some message">
+                <input id="chat-input" placeholder="Start typing some message" type="text"\>
             </div>
         </div>
 
@@ -143,8 +148,18 @@
             <div id="menu">
                 <div class="menu-banner"> 
                     <div id="menu-dragger"> Setup </div>
-                    <img src="menu_options_icon.png" alt="menu options" id="menu-options">
+                    <img src="menu_options_icon.png" alt="menu options" id="menu-options"\>
                 </div>
+                <img src="casada_chat_logo.png" alt="casada logo" class="casada-chat-logo"\><br>
+                <img src="default_avatar.jpg" alt="default avatar" id="new-avatar"\><br>
+                <input type="file"/>
+                <button type="button" id="avatar-uploader"> Upload your avatar </button><br>
+                <div class="text"> Nick </div> <br>
+                <input type="text" id="new-nick"/> <br>
+                <div class="text"> Room </div> <br>
+                <input type="text"id="new-room"/> <br>
+                <button type="button" id="reset-changes"> Reset changes </button>
+                <button type="button" id="apply-changes"> Apply changes </button>
             </div>
         </div>
 
