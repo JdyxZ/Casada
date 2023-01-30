@@ -451,9 +451,11 @@ background-color: var(--light3-dark-color);
 .message-content
 {
     display: inline-block;
-    color:white;
+    text-align: justify;
+    color: white;
     max-width: fit-content;
-    word-wrap: break-word;
+    word-break: break-word;
+    margin-right: 10px;
 }
 
 .message-time
@@ -461,9 +463,9 @@ background-color: var(--light3-dark-color);
     display: inline-block;
     color: #c7c7c7;
     width: fit-content;
+    height: fit-content;
     font-size: 12px;
-    margin-left: 6px;
-    transform: translate(0px, 7px);
+    margin-top: auto;
 }
 
 /*BANNER*/
