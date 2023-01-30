@@ -19,6 +19,10 @@
 - init_base_emojis() -> handle exceptions.❌
 - Change selectors.✅
 - Group conversation messages.
+- Change MYCHAT by Casada.
+- Keep focus on input when we exit the emoji menu.
+- Positionate well the emoji menu.
+- When click out of the scope of room menu, exit menu.
 - SillyServer.
 - Sort chats based on the most recent message (with animation?).
 - Unread message status.

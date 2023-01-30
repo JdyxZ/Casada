@@ -145,9 +145,6 @@ var MYCHAT =
 		// Clone template
 		var message_box = message_template.cloneNode(true);
 
-		// Set user avatar in case of group template
-		if (conversation_classes.contains("group")) message_box.querySelector(".avatar").src = current_avatar.src;
-
 		// Set username in case of group template
 		if (conversation_classes.contains("group")) message_box.querySelector(".username").innerText = current_nick;
 

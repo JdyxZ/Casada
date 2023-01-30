@@ -364,8 +364,31 @@ background-color: var(--light3-dark-color);
     word-wrap: break-word;
 }
 
+.message-content
+{
+    display: inline-block;
+    text-align: justify;
+    color: white;
+    max-width: fit-content;
+    word-break: break-word;
+}
+
+.message-time
+{
+    display: inline-block;
+    color: #c7c7c7;
+    width: fit-content;
+    height: fit-content;
+    font-size: 11px;
+    margin-left: 7px;
+    margin-top: auto;
+    transform: translate(0px, 5px);
+}
+
+/*PRIVATE CONVERSATIONS*/ 
 .private .user-message
 {
+    display:flex;
     width: fit-content;
     max-width: 55%;
     background-image: linear-gradient(to right, #df47ac, #0093f4);
@@ -383,6 +406,22 @@ background-color: var(--light3-dark-color);
     margin: 0% auto 10px 5%;
     padding: 10px 10px 10px 10px;
     border-radius: 0px 8px 8px 8px;
+}
+
+/*GROUP CONVERSATIONS*/ 
+.group-message-layout
+{
+    display: grid;
+    max-width: 55%;
+    height: 90%;
+    min-width: calc(var(--screen_width) * 0.5);
+    min-height: calc(var(--screen_width) * 0.25);
+    z-index: 1;
+    margin: 2% 5% 2% 5%;
+    grid-template-columns: minmax(calc(var(--screen_width) * 0.25), 30%) 1fr;
+    grid-template-rows: auto 1fr minmax(calc(var(--screen_height) * 0.055), 4vh); 
+    background-color: #999999;
+
 }
 
 .group .user-message
@@ -446,26 +485,6 @@ background-color: var(--light3-dark-color);
 {
     color:palevioletred;
     margin-bottom: 7px;
-}
-
-.message-content
-{
-    display: inline-block;
-    text-align: justify;
-    color: white;
-    max-width: fit-content;
-    word-break: break-word;
-    margin-right: 10px;
-}
-
-.message-time
-{
-    display: inline-block;
-    color: #c7c7c7;
-    width: fit-content;
-    height: fit-content;
-    font-size: 12px;
-    margin-top: auto;
 }
 
 /*BANNER*/
