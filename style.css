@@ -1,10 +1,9 @@
 /*VARIABLES*/
-
 :root
 {
     --screen_height: 864px;
     --screen_width: 1536px;
-    --featured-color1: #154648;
+    --featured-color1: #48234a;
     --featured-color2: #298087;
     --dark-color: #111b21;
     --light1-dark-color: #202c33;
@@ -12,22 +11,10 @@
     --light3-dark-color: #4f545c;
     --chat-info-footer-color: #363636;
     --contacts-message-box-color: #423333;
-    --user-message-box-gradient1-color: #df47ac;
-    --user-message-box-gradient2-color: #0093f4;
     --menu-color: #202c33;
 }
 
 /*GENERAL SETTINGS*/
-
-.avatar
-{
-    width:50px;
-    height:50px;
-    object-fit: cover;
-    border-radius:100%;
-    margin-right:15px;
-}
-
 .text
 {
     color:white;
@@ -46,7 +33,6 @@
 
 
 /*MAIN CONTAINER*/
-
 body
 {
     background-image: url("images/wallpaper_background.jpg");
@@ -113,7 +99,7 @@ body
     direction: rtl;
 }
 
-.grid-current-chat
+.grid-conversations
 {
     display: flex;
     flex-direction: column;
@@ -125,7 +111,7 @@ body
     overflow-y: auto;
 }
 
-.grid-current-chat .fix 
+.grid-conversations .fix 
 {
     flex: 1 1 auto;
     margin-bottom: 3.5%;
@@ -172,7 +158,16 @@ border-radius: 25px;
 background-color: var(--light3-dark-color);
 }
 
-/* USER INFO */
+/* USER PROFILE */
+.grid-user-profile .avatar
+{
+    width:50px;
+    height:50px;
+    object-fit: cover;
+    border-radius: 100%;
+    margin-right: 15px;
+}
+
 #username
 {
     width: 60%;
@@ -187,27 +182,35 @@ background-color: var(--light3-dark-color);
     margin-top: 2%;
 }
 
-/* CURRENT CHAT INFO */
-.current-chat-info
+/* CURRENT CHAT PROFILE */
+.grid-chat-profile .avatar
+{
+    width:50px;
+    height:50px;
+    object-fit: cover;
+    border-radius: 100%;
+    margin-right: 15px;
+}
+
+.grid-chat-profile .info
 {
     transform: translate(0px, -3px);
     overflow: hidden;
 }
 
-#current-chat-username
+.grid-chat-profile .username
 {
     margin-top: 5px;
     margin-bottom: 7px;
 }
 
-#current-chat-status
+.grid-chat-profile .status
 {
     font-size: 15px;
 }
 
 /* CHATS */
-
-.search-bar-box
+.grid-chats .search-bar
 {
     margin-left: 5%;
     margin-right: 2%;
@@ -236,7 +239,7 @@ background-color: var(--light3-dark-color);
     transition: all 2s;
 }
 
-.eraser-hidden
+.grid-chats .eraser-hidden
 {
     display: none;
     opacity: 0;
@@ -247,7 +250,7 @@ background-color: var(--light3-dark-color);
     margin-bottom: 20em;
 }
 
-.eraser-showing
+.grid-chats .eraser-showing
 {
     height: 13px;
     width: 13px;
@@ -262,7 +265,16 @@ background-color: var(--light3-dark-color);
     width: auto;
 }
 
-.chat
+#chats .avatar
+{
+    width:50px;
+    height:50px;
+    object-fit: cover;
+    border-radius: 100%;
+    margin-right: 15px;
+}
+
+#chats .chat
 {
     display:flex;
     padding-top: 15px;
@@ -272,12 +284,12 @@ background-color: var(--light3-dark-color);
     transition: background-color 1ms;
 }
 
-.chat:hover
+#chats .chat:hover
 {
     background-color: var(--light1-dark-color);
 }
 
-.selected-chat
+#chats .current
 {
     display:flex;
     padding-top: 15px;
@@ -287,98 +299,182 @@ background-color: var(--light3-dark-color);
     background-color: var(--featured-color1);
 }
 
-.chat-info
+#chats .info
 {
     display: inline-block;
     width: -webkit-fill-available;
+    overflow-x: clip;
 }
 
-#chat-info-username
+#chats .username
 {
     margin-bottom: 10px;
 }
 
-#chat-info-last-message
+#chats .last-message
 {
     font-size: 15px;
     margin-bottom: 15px;
 }
 
-#chat-info-footer
+#chats .footer
 {
     width: auto;
     background-color: var(--chat-info-footer-color);
     height: 0.5px;
 }
 
-/*CURRENT CHAT MESSAGES*/ 
+#chats .current .footer
+{
+    display: none;
+}
 
-.status-message-box
+/*CHAT CONVERSATIONS*/ 
+.grid-conversations .current
+{
+    width:auto;
+    height: auto;
+}
+
+.grid-conversations .not-current
+{
+    display:none;
+}
+
+.grid-conversations .conversation
+{
+    width: auto;
+    height: auto;
+}
+
+.status-message
 { 
     color:white;
     background-color: var(--light2-dark-color);
     margin: 0% auto 15px auto;
+    width: fit-content;
     max-width: 85%;
     padding: 10px 10px 10px 10px;
     border-radius: 8px 8px 8px 8px;
 }
 
-.status-message
+.status-message .message
 {
     text-align: center;
     word-wrap: break-word;
 }
 
-.user-message-box
+.private .user-message
 {
-    color: white;
-    /*background-color: #247278;*/
-    background-image: linear-gradient(to right, var(--user-message-box-gradient1-color), var(--user-message-box-gradient2-color));
-    margin: 0% 5% 10px auto;
+    width: fit-content;
     max-width: 55%;
+    background-image: linear-gradient(to right, #df47ac, #0093f4);
+    margin: 0% 5% 10px auto;
     padding: 10px 10px 10px 10px;
     border-radius: 8px 0px 8px 8px;
 }
 
-.contacts-message-box
+.private .people-message
 {
-    background-color: var(--contacts-message-box-color);
-    margin: 0% auto 10px 5%;
+    display: flex;
+    width: fit-content;
     max-width: 55%;
+    background-image: linear-gradient(to right, #48234a, #298087);
+    margin: 0% auto 10px 5%;
     padding: 10px 10px 10px 10px;
     border-radius: 0px 8px 8px 8px;
 }
 
+.group .user-message
+{
+    margin: 0% 15px 15px auto;
+}
+
+.group .people-message
+{
+    margin: 0% auto 15px 15px;
+    max-width: 55%;
+    width: fit-content;
+}
+
+.group .user-message .message
+{
+    display:inline-block;
+    background-color: var(--featured-color1);
+    padding: 10px 10px 10px 10px;
+    border-radius: 8px 0px 8px 8px;
+}
+
+.group .people-message .message
+{
+    display:inline-block;
+    background-color: var(--dark-color);
+    padding: 10px 10px 10px 10px;
+    border-radius: 0px 8px 8px 8px;
+}
+
+.group .user-message .avatar
+{
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 100%;
+    margin-right: 5px;
+    margin-bottom: 30px;
+}
+
+.group .people-message .avatar
+{
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 100%;
+    margin-right: 5px;
+    margin-bottom: 30px;
+}
+
+.group .user-message .username
+{
+    color: aqua;
+    margin-bottom: 7px;
+}
+
+
+.group .people-message .username
+{
+    color:palevioletred;
+    margin-bottom: 7px;
+}
+
 .message-content
 {
-    color:white;
     display: inline-block;
-    max-width: -webkit-fill-available;
+    color:white;
+    max-width: fit-content;
     word-wrap: break-word;
 }
 
 .message-time
 {
-    color: rgb(134, 133, 133);
     display: inline-block;
-    float: right;
-    max-width: max-content;
+    color: #c7c7c7;
+    width: fit-content;
     font-size: 12px;
     margin-left: 6px;
     transform: translate(0px, 7px);
 }
 
 /*BANNER*/
-.casada-logo
+.grid-banner .casada-logo
 {
     width: 40%;
     height: auto;
     transform: translate(-10px,-5px);
 }
 
-
 /*INPUT*/
-
 .emoji-icon
 {
     float: left;
@@ -388,7 +484,7 @@ background-color: var(--light3-dark-color);
     /*background-color: #8a8a8a;*/
 }
 
-#chat-input
+#keyboard-input
 {
     display: inherit;
     color: white;
@@ -411,7 +507,7 @@ background-color: var(--light3-dark-color);
     position: absolute;
     height: -webkit-fill-available;
     width: -webkit-fill-available;
-    z-index: 2;
+    z-index: 0;
 }
 
 #menu
@@ -447,7 +543,7 @@ background-color: var(--light3-dark-color);
     transform: translate(-22px, -21px);
 }
 
-.casada-chat-logo
+#menu .casada-logo
 {
     width:50%;
     height: auto;

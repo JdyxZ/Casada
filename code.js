@@ -6,9 +6,9 @@ var MYCHAT =
 	emoji_picker: new EmojiKeyboard,
 	search_bar_box: null,
 	chat_search_bar: null,
-	eraser: null,
-	chats_div: null,
+	chat_eraser: null,
 	chats: null,
+	chats_children: null,
 	menu: null,
 	menu_grid: null,
 	menu_dragger: null,
@@ -31,13 +31,13 @@ var MYCHAT =
 	init:function()
 	{
 		// JS variables
-		input = MYCHAT.Q("#chat-input");
+		input = MYCHAT.Q("#keyboard-input");
 		new_chat_trigger = MYCHAT.Q("#new-chat-trigger");
-		search_bar_box = MYCHAT.Q(".search-bar-box");
+		search_bar_box = MYCHAT.Q(".grid-chats .search-bar");
 		chat_search_bar = MYCHAT.Q("#chat-search-bar");
-		eraser = MYCHAT.Q("#eraser");
-		chats_div = MYCHAT.Q("#chats");
-		chats = document.querySelectorAll("#chats > div");
+		chat_eraser = MYCHAT.Q("#chat-eraser");
+		chats = MYCHAT.Q("#chats");
+		chats_children = document.querySelectorAll("#chats > div");
 		menu = MYCHAT.Q("#menu");
 		menu_grid = MYCHAT.Q(".menu-grid");
 		menu_dragger = MYCHAT.Q("#menu-dragger");
@@ -67,13 +67,10 @@ var MYCHAT =
 		chat_search_bar.addEventListener("keyup", MYCHAT.onKeyUp);
 
 		// Erase search
-		eraser.addEventListener("click", () =>{
-			chat_search_bar.value = "";
-			chats.forEach( (element) => { element.style.display = ""; });
-		});
+		chat_eraser.addEventListener("click", MYCHAT.eraseChatSearch);
 
 		// Select a chat
-		chats_div.addEventListener("click", MYCHAT.selectChat);
+		chats.addEventListener("click", MYCHAT.selectChat);
 
 		// Emoji picker
 		MYCHAT.emojiPickerInit();
@@ -107,8 +104,8 @@ var MYCHAT =
 	{
 		//console.log(event.key);
 		
-		if(this.id == "chat-input")
-		{
+		if(this.id == "keyboard-input")
+		{		
 			if(event.code == "Enter")
 			{
 				MYCHAT.sendMessage();
@@ -136,11 +133,23 @@ var MYCHAT =
 		// Check input is not empty
 		if (input.value == '') return;
 
-		// Fetch template
-		var message_template = MYCHAT.Q("#message-template")
+		// Fetch current conversation
+		const current_conversation = MYCHAT.Q(".grid-conversations .current")
+
+		// Fetch the current conversation type
+		const conversation_classes = current_conversation.classList;
+
+		// Fetch private or group template
+		const message_template = conversation_classes.contains("private") ? MYCHAT.Q("#private-message-template") : MYCHAT.Q("#group-message-template");
 
 		// Clone template
 		var message_box = message_template.cloneNode(true);
+
+		// Set user avatar in case of group template
+		if (conversation_classes.contains("group")) message_box.querySelector(".avatar").src = current_avatar.src;
+
+		// Set username in case of group template
+		if (conversation_classes.contains("group")) message_box.querySelector(".username").innerText = current_nick;
 
 		// Set input box text value to template
 		message_box.querySelector(".message-content").innerText = input.value;
@@ -150,7 +159,11 @@ var MYCHAT =
 		message_box.querySelector(".message-time").innerText = date.getHours().toString().padStart(2,"0") + ":" + date.getMinutes().toString().padStart(2, "0");
 
 		// Add template to the DOM
-		MYCHAT.Q("#current-chat").appendChild(message_box);
+		current_conversation.querySelector(".conversation").appendChild(message_box);
+
+		//Delete template old attributes
+		message_box.removeAttribute('style');
+		message_box.removeAttribute('id');
 
 		// Show new message
 		message_box.style.display = ''
@@ -168,19 +181,19 @@ var MYCHAT =
 		const regex = new RegExp(query, "i");
 
 		// Cross icon transition
-		if(chat_search_bar.value.length > 0)
+		if(query.length > 0)
 		{
-			eraser.className = "eraser-showing";
+			chat_eraser.classList.replace("eraser-hidden", "eraser-showing");
 			search_bar_box.style.marginBottom = "-9px";
 		}
 		else
 		{
-			eraser.className = "eraser-hidden";
+			chat_eraser.classList.replace("eraser-showing", "eraser-hidden");
 			search_bar_box.style.marginBottom = "10px";
 		}
 
 		// Filter chats
-		chats.forEach(function(element){
+		chats_children.forEach(function(element){
 
 			if(query.length == 0)
 			{
@@ -188,8 +201,8 @@ var MYCHAT =
 			}
 			else
 			{
-				const username = element.querySelector("#chat-info-username").innerText;
-				const last_message = element.querySelector("#chat-info-last-message").innerText;
+				const username = element.querySelector(".username").innerText;
+				const last_message = element.querySelector(".last-message").innerText;
 	
 				if(regex.test(username) || regex.test(last_message))
 				{
@@ -204,22 +217,37 @@ var MYCHAT =
 
 	},
 
+	eraseChatSearch:function()
+	{
+		chat_search_bar.value = "";
+		chat_eraser.classList.replace("eraser-showing", "eraser-hidden");
+		search_bar_box.style.marginBottom = "10px";
+		chats_children.forEach( (element) => { 
+			element.style.display = ""; 
+		});
+	},
+
 	selectChat:function(event)
 	{
-		selected_chat = MYCHAT.Q(".selected-chat");
+		const current_chat = MYCHAT.Q("#chats .current");
+		const current_conversation = MYCHAT.Q(".grid-conversations .current");
 		const regex = /chat[1-9]+/;
 		
 		for (const element of event.path)
 		{
 			if(element.id != undefined && element.id.match(regex) != null)
 			{
-				//Swap current selected chat to not selected
-				selected_chat.className = "chat";
-				selected_chat.querySelector("#chat-info-footer").style.display = "";
+				// Swap current selected chat to not selected
+				current_chat.classList.replace("current", "chat");
 
-				//Select the clicked chat
-				element.className = "selected-chat";
-				element.querySelector("#chat-info-footer").style.display = "none";
+				// Select the clicked chat
+				element.classList.replace("chat", "current");
+
+				// Swap current conversation to not selected
+				current_conversation.classList.replace("current", "not-current");
+
+				// Change to the conversation of the clicked chat
+				MYCHAT.Q("#" + element.id + "-conversation").classList.replace("not-current", "current");
 
 				//End execution
 				break;
@@ -243,7 +271,7 @@ var MYCHAT =
 		MYCHAT.Q(".grid-user-profile").addEventListener("click", MYCHAT.hideEmojiPicker);
 		MYCHAT.Q(".grid-chat-profile").addEventListener("click", MYCHAT.hideEmojiPicker);
 		MYCHAT.Q(".grid-chats").addEventListener("click", MYCHAT.hideEmojiPicker);
-		MYCHAT.Q(".grid-current-chat").addEventListener("click", MYCHAT.hideEmojiPicker);
+		MYCHAT.Q(".grid-conversations").addEventListener("click", MYCHAT.hideEmojiPicker);
 		MYCHAT.Q("#grid-layout").addEventListener("click", MYCHAT.hideEmojiPicker);
 		document.addEventListener("keydown", MYCHAT.onKeyDown);
 	},

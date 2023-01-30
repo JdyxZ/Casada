@@ -17,7 +17,7 @@
 - Organise repository: add folders for resources.✅
 - Custom scroll bar.✅
 - init_base_emojis() -> handle exceptions.❌
-- Change selectors.
+- Change selectors.✅
 - Group conversation messages.
 - SillyServer.
 - Sort chats based on the most recent message (with animation?).

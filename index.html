@@ -19,119 +19,82 @@
 
         <!-- Main Interface -->
         <div class="grid-layout">
-            <div id="user_profile" class="grid-user-profile"> 
+            <div class="grid-user-profile"> 
                 <img src="images/icon2.jpg" alt="Avatar" class="avatar" id="user-avatar">
-                <div class="text" id="username"> Myke⛄ </div>
+                <div id="username" class="text"> Myke⛄ </div>
                 <img src="images/new_chat_icon.png" alt="new_chat" id="new-chat-trigger"\>
             </div>
-            <div id="chat_profile" class="grid-chat-profile">
+            <div class="grid-chat-profile">
                 <img src="images/icon1.jpg" alt="Avatar" class="avatar" style="margin-left:2%"\>
-                <div class="current-chat-info">
-                    <div id="current-chat-username" class="text"> Zero2🍑 </div>
-                    <div id="current-chat-status" class="light-text"> Status</div>
+                <div class="info">
+                    <div class="username text"> Zero2🍑 </div>
+                    <div class="status light-text"> Status</div>
                 </div>
             </div>
             <div class="grid-chats">
-                <div class="search-bar-box">
+                <div class="search-bar">
                     <input id="chat-search-bar" placeholder="Search for a chat..." type="text"\>
-                    <img src="images/cross_icon.png" alt="cross" id="eraser" class="eraser-hidden"\>
+                    <img src="images/cross_icon.png" alt="cross" id="chat-eraser" class="eraser-hidden"\>
                 </div>
                 <div id="chats">
-                    <div id="chat1" class="selected-chat">
+                    <div id="chat1" class="current">
                         <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
-                        <div class="chat-info">
-                            <div id="chat-info-username" class="text"> Zero2🍑 </div>
-                            <div id="chat-info-last-message" class="light-text"> Last sent message</div>
-                            <div id="chat-info-footer" style="display:none"></div>
+                        <div class="info">
+                            <div class="username text"> Zero2🍑 </div>
+                            <div class="last-message light-text"> Last sent message</div>
+                            <div class="footer"></div>
                         </div>
                     </div>
                     <div id="chat2" class="chat">
                         <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
-                        <div class="chat-info">
-                            <div id="chat-info-username" class="text"> Zero3🍑 </div>
-                            <div id="chat-info-last-message" class="light-text"> Last sent message</div>
-                            <div id="chat-info-footer"></div>
-                        </div>
-                    </div>
-                    <div id="chat3" class="chat">
-                        <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
-                        <div class="chat-info">
-                            <div id="chat-info-username" class="text"> Zero4🍑 </div>
-                            <div id="chat-info-last-message" class="light-text"> Last sent message</div>
-                            <div id="chat-info-footer"></div>
-                        </div>
-                    </div>
-                    <div id="chat4" class="chat">
-                        <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
-                        <div class="chat-info">
-                            <div id="chat-info-username" class="text"> Zero5🍑 </div>
-                            <div id="chat-info-last-message" class="light-text"> Last sent message</div>
-                            <div id="chat-info-footer"></div>
-                        </div>
-                    </div>
-                    <div id="chat5" class="chat">
-                        <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
-                        <div class="chat-info">
-                            <div id="chat-info-username" class="text"> Zero6🍑 </div>
-                            <div id="chat-info-last-message" class="light-text"> Last sent message</div>
-                            <div id="chat-info-footer"></div>
-                        </div>
-                    </div>
-                    <div id="chat6" class="chat">
-                        <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
-                        <div class="chat-info">
-                            <div id="chat-info-username" class="text"> Zero7🍑 </div>
-                            <div id="chat-info-last-message" class="light-text"> Last sent message</div>
-                            <div id="chat-info-footer"></div>
-                        </div>
-                    </div>
-                    <div id="chat7" class="chat">
-                        <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
-                        <div class="chat-info">
-                            <div id="chat-info-username" class="text"> Zero8🍑 </div>
-                            <div id="chat-info-last-message" class="light-text"> Last sent message</div>
-                            <div id="chat-info-footer"></div>
-                        </div>
-                    </div>
-                    <div id="chat8" class="chat">
-                        <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
-                        <div class="chat-info">
-                            <div id="chat-info-username" class="text"> Zero9🍑 </div>
-                            <div id="chat-info-last-message" class="light-text"> Last sent message</div>
-                            <div id="chat-info-footer"></div>
-                        </div>
-                    </div>
-                    <div id="chat9" class="chat">
-                        <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
-                        <div class="chat-info">
-                            <div id="chat-info-username" class="text"> Zero10🍑 </div>
-                            <div id="chat-info-last-message" class="light-text"> Last sent message</div>
-                            <div id="chat-info-footer"></div>
-                        </div>
-                    </div>
-                    <div id="chat10" class="chat">
-                        <img src="images/icon1.jpg" alt="Avatar" class="avatar"\>
-                        <div class="chat-info">
-                            <div id="chat-info-username" class="text"> Zero11🍑 </div>
-                            <div id="chat-info-last-message" class="light-text"> Last sent message</div>
-                            <div id="chat-info-footer"></div>
+                        <div class="info">
+                            <div class="username text"> Zero3🍑 </div>
+                            <div class="last-message light-text"> Last sent message</div>
+                            <div class="footer"></div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div id="current-chat" class="grid-current-chat">
-
+            <div class="grid-conversations">
                 <div class="fix"></div>
-                <div class="status-message-box">
-                    <div class="status-message"> Conversation created the 12/04/2021</div>
+                <div id="chat1-conversation" class="current private">
+                    <div class="conversation">
+                        <div class="status-message">
+                            <div class="message"> Conversation created the 12/04/2021</div>
+                        </div>
+                        <div class="people-message">
+                            <div class="message-content"> Heyy, honey💞 </div>
+                            <div class="message-time"> 10:41 </div>
+                        </div>
+                        <div class="people-message">
+                            <div class="message-content"> Do you feel like eating out tonight?😋 </div>
+                            <div class="message-time"> 10:42 </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="contacts-message-box">
-                    <div class="message-content"> Heyy, honey💞 </div>
-                    <div class="message-time light-text"> 10:41 </div>
-                </div>
-                <div class="contacts-message-box">
-                    <div class="message-content"> Do you feel like eating out tonight?😋 </div>
-                    <div class="message-time light-text"> 10:42 </div>
+                <div id="chat2-conversation" class="not-current group">
+                    <div class="conversation">
+                        <div class="status-message">
+                            <div class="message"> Group created the 20/05/2020</div>
+                        </div>
+                        <div class="people-message">
+                            <img src="images/default_avatar.jpg" alt="Avatar" class="avatar"\>
+                            <div class="message">
+                                <div class="username"> Haylo </div>
+                                <div class="message-content"> Heyy, bro👊 </div>
+                                <div class="message-time"> 10:42 </div>
+                            </div>
+                        </div>
+                        <div class="people-message">
+                            <img src="images/default_avatar.jpg" alt="Avatar" class="avatar"\>
+                            <div class="message">
+                                <div class="username"> Dwyght </div>
+                                <div class="message-content"> What's up y'all?🥳 </div>
+                                <div class="message-time"> 10:43 </div>
+                            </div>
+                            
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="grid-banner">
@@ -139,7 +102,7 @@
             </div>
             <div class="grid-input"> 
                 <img src="images/emoji_picker.png" alt="Emoji Picker" id="emoji-picker" class="emoji-icon"\>
-                <input id="chat-input" placeholder="Start typing some message" type="text"\>
+                <input id="keyboard-input" placeholder="Start typing some message" type="text"\>
             </div>
         </div>
 
@@ -150,7 +113,7 @@
                     <div id="menu-dragger"> Setup </div>
                     <img src="images/menu_options_icon.png" alt="menu options" id="menu-options"\>
                 </div>
-                <img src="images/casada_chat_logo.png" alt="casada logo" class="casada-chat-logo"\><br>
+                <img src="images/casada_chat_logo.png" alt="casada logo" class="casada-logo"\><br>
                 <img src="images/default_avatar.jpg" alt="default avatar" id="new-avatar"\><br>
                 <input type="file"/>
                 <img src="images/camera-icon.png" id="avatar-uploader"><br>
@@ -165,9 +128,18 @@
         </div>
 
         <!--- Templates -->
-        <div style="display:none" id="message-template" class="user-message-box">
+        <div style="display:none" id="private-message-template" class="user-message">
             <div class="message-content"> </div>
-            <div class="message-time" style="color:rgb(207,207,207)"> </div>
+            <div class="message-time"> </div>
+        </div>
+
+        <div style="display:none" id="group-message-template" class="user-message">
+            <img src="images/default_avatar.jpg" alt="Avatar" class="avatar"\>
+            <div class="message">
+                <div class="username"></div>
+                <div class="message-content"></div>
+                <div class="message-time"></div>
+            </div>
         </div>
         
     </div>
