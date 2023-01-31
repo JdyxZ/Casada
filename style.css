@@ -62,31 +62,31 @@ body
     z-index: 1;
     margin: 2% 5% 2% 5%;
     grid-template-columns: minmax(calc(var(--screen_width) * 0.25), 30%) 1fr;
-    grid-template-rows: auto 1fr minmax(calc(var(--screen_height) * 0.055), 4vh); 
+    grid-template-rows: auto 1fr minmax(calc(var(--screen_height) * 0.065), 4vh);
     background-color: #999999;
 }
 
 .grid-user-profile
 {
+    display: flex;
+    place-content: start;
     background-color: var(--featured-color1);
     grid-column: 1;
     grid-row: 1;
     padding: 15px 15px 15px 15px;
     margin-right: 0.03cm;
     overflow: hidden;
-    display:flex;
-    place-content: start;
 }
 
 .grid-chat-profile
 {
+    display:flex;
+    place-content: start;
     background-color: var(--featured-color1);
     grid-column: 2;
     grid-row: 1;
     padding: 15px 15px 15px 15px;
     overflow: hidden;
-    display:flex;
-    place-content: start;
 }
 
 .grid-chats
@@ -129,10 +129,11 @@ body
 
 .grid-input
 {
+    display: inline-flex;
+    place-items: center;
     background-color: var(--light1-dark-color);
     grid-column: 2;
     grid-row: 3;
-    padding-top: 5px;
 }
 
 /* SCROLLBARS  */
@@ -178,6 +179,7 @@ background-color: var(--light3-dark-color);
 {
     width: 10%;
     height: auto;
+    object-fit: contain;
     margin-left: 14%;
     margin-top: 2%;
 }
@@ -246,8 +248,8 @@ background-color: var(--light3-dark-color);
     height: 13px;
     width: 13px;
     position: relative;
-    transform: translate(-30px, -42px);
     margin-bottom: 20em;
+    transform: translate(-1.8em, -2.5em);
 }
 
 .grid-chats .eraser-showing
@@ -255,7 +257,7 @@ background-color: var(--light3-dark-color);
     height: 13px;
     width: 13px;
     position: relative;
-    transform: translate(-30px, -42px);
+    transform: translate(-1.8em, -2.5em);
 }
 
 
@@ -490,9 +492,8 @@ background-color: var(--light3-dark-color);
 /*BANNER*/
 .grid-banner .casada-logo
 {
-    width: 40%;
+    width: 43%;
     height: auto;
-    transform: translate(-10px,-5px);
 }
 
 /*INPUT*/
@@ -501,8 +502,7 @@ background-color: var(--light3-dark-color);
     float: left;
     width: 25px;
     height: 25px;
-    margin: 11px 20px 0% 20px;
-    /*background-color: #8a8a8a;*/
+    margin: 0px 20px 0% 20px;
 }
 
 #keyboard-input
@@ -572,7 +572,7 @@ background-color: var(--light3-dark-color);
     margin-top: 2%;
 }
 
-#new-avatar
+#menu-avatar
 {
     width:200px;
     height: 200px;
@@ -649,5 +649,3 @@ background-color: var(--light3-dark-color);
 {
     background-color: var(--featured-color2);
 }
-
-

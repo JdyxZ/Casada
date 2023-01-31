@@ -21,15 +21,16 @@
 - Group conversation messages.✅
 - Change MYCHAT by Casada.✅
 - Keep focus on input when we exit the emoji menu.✅
-- When click out of the scope of room menu, exit menu.
-- Select chat: Keep scroll or scroll down.
-- Positionate well the emoji menu.
+- Select chat: Keep scroll or scroll down.✅
+- Positionate well the emoji menu. ✅
 - SillyServer.
 - Sort chats based on the most recent message (with animation?).
 - Unread message status.
 - Cross animation.
 - Checked message.
 - Conversation messages search bar.
+- Avatar selector.
+- When click out of the scope of room menu, exit menu.
 
 ## Notas
 white color : eaeaea

@@ -25,7 +25,7 @@ https://stackoverflow.com/questions/36652580/how-to-add-three-dots-to-text-when-
 https://stackoverflow.com/questions/45581361/how-can-i-catch-a-404-error-in-javascript
 https://stackoverflow.com/questions/15118540/css-text-align-justify-big-spaces 
 https://stackoverflow.com/questions/17642872/refresh-page-and-keep-scroll-position 
-https://stackoverflow.com/questions/17642872/refresh-page-and-keep-scroll-position (parent element -> scrolltop, scrollto(0,scrolltop))
+https://stackoverflow.com/questions/17642872/refresh-page-and-keep-scroll-position
 
 
 

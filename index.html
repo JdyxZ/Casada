@@ -11,8 +11,8 @@
     <!-- Emoji Picker-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.js"></script>
-    <script src="components/emoji_keyboard.js"></script>
-    <link rel="stylesheet" href="components/emoji_keyboard.css">
+    <script src="modules/emoji_keyboard.js"></script>
+    <link rel="stylesheet" href="modules/emoji_keyboard.css">
 </head>
 <body>
     <div id="main">
@@ -124,13 +124,13 @@
                     <img src="images/menu_options_icon.png" alt="menu options" id="menu-options"\>
                 </div>
                 <img src="images/casada_chat_logo.png" alt="casada logo" class="casada-logo"\><br>
-                <img src="images/default_avatar.jpg" alt="default avatar" id="new-avatar"\><br>
+                <img src="images/default_avatar.jpg" alt="default avatar" id="menu-avatar"\><br>
                 <input type="file"/>
                 <img src="images/camera-icon.png" id="avatar-uploader"><br>
                 <div type="text"> Nick </div> <br>
-                <input type="text" id="new-nick"/ onclick="this.placeholder = '', this.style.border= 'none'" maxlength="20"> <br>
+                <input type="text" id="menu-nick"/ onclick="this.placeholder = '', this.style.border= 'none'" maxlength="20"> <br>
                 <div type="text"> Room </div> <br>
-                <input type="text" id="new-room" list="available-rooms" onclick="this.placeholder = '', this.style.border= 'none'"/> 
+                <input type="text" id="menu-room" list="available-rooms" onclick="this.placeholder = '', this.style.border= 'none'"/> 
                 <datalist id="available-rooms"></datalist><br>
                 <button type="button" id="reset-changes"> Reset changes </button>
                 <button type="button" id="apply-changes"> Apply changes </button>

@@ -7,10 +7,10 @@
     flex-direction: column;
     height: 50vh;
     width: 30vw;
-    position: relative;
+    position: absolute;
+    bottom: 5.3rem;
+    margin-left: 1rem;
     z-index: 1;
-    margin-left: calc(var(--screen_width) * 0.015);
-    bottom: calc(50vh + var(--screen_height) * 0.063);
     user-select: none;
     font-family: 'Roboto', 'Whitney', 'Catamaran', 'Helvetica Neue', sans-serif;
 }
