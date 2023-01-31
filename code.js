@@ -1,4 +1,29 @@
-var MYCHAT =
+// Custom methods
+
+Number.prototype.clamp = function(min, max) 
+{
+	return Math.min(Math.max(this.valueOf(), min), max);
+};
+
+Element.prototype.getParents = function()
+{
+	let parents = new Array();
+	let current_element = this;
+	
+	while (current_element.parentNode != null)
+	{
+		let parent = current_element.parentNode;
+		parents.push(parent);
+		current_element = parent;
+	}
+
+	return parents;    
+};
+
+
+// Namespace
+
+var Casada =
 {
 	input: null,
 	root: document.documentElement,
@@ -13,7 +38,6 @@ var MYCHAT =
 	menu_grid: null,
 	menu_dragger: null,
 	menu_options: null,
-	clamp: null,
 	available_height: null,
 	available_width: null,
 	avatar_uploader: null,
@@ -27,77 +51,79 @@ var MYCHAT =
 	current_room: null,
 	available_rooms: null,
 	rooms_datalist: null,
+	chat_scrolls: null,
 
 	init:function()
 	{
 		// JS variables
-		input = MYCHAT.Q("#keyboard-input");
-		new_chat_trigger = MYCHAT.Q("#new-chat-trigger");
-		search_bar_box = MYCHAT.Q(".grid-chats .search-bar");
-		chat_search_bar = MYCHAT.Q("#chat-search-bar");
-		chat_eraser = MYCHAT.Q("#chat-eraser");
-		chats = MYCHAT.Q("#chats");
+		input = Casada.Q("#keyboard-input");
+		new_chat_trigger = Casada.Q("#new-chat-trigger");
+		search_bar_box = Casada.Q(".grid-chats .search-bar");
+		chat_search_bar = Casada.Q("#chat-search-bar");
+		chat_eraser = Casada.Q("#chat-eraser");
+		chats = Casada.Q("#chats");
 		chats_children = document.querySelectorAll("#chats > div");
-		menu = MYCHAT.Q("#menu");
-		menu_grid = MYCHAT.Q(".menu-grid");
-		menu_dragger = MYCHAT.Q("#menu-dragger");
-		menu_options = MYCHAT.Q("#menu-options");
+		menu = Casada.Q("#menu");
+		menu_grid = Casada.Q(".menu-grid");
+		menu_dragger = Casada.Q("#menu-dragger");
+		menu_options = Casada.Q("#menu-options");
 		available_height = window.screen.availHeight;
 		available_width = window.screen.availWidth;
-		avatar_uploader = MYCHAT.Q("#avatar-uploader");
-		new_avatar = MYCHAT.Q("#new-avatar");
-		new_nick = MYCHAT.Q("#new-nick");
-		new_room = MYCHAT.Q("#new-room");
-		reset_changes = MYCHAT.Q("#reset-changes");
-		apply_changes = MYCHAT.Q("#apply-changes");
-		current_avatar = MYCHAT.Q("#user-avatar");
-		current_nick = MYCHAT.Q("#username");
+		avatar_uploader = Casada.Q("#avatar-uploader");
+		new_avatar = Casada.Q("#new-avatar");
+		new_nick = Casada.Q("#new-nick");
+		new_room = Casada.Q("#new-room");
+		reset_changes = Casada.Q("#reset-changes");
+		apply_changes = Casada.Q("#apply-changes");
+		current_avatar = Casada.Q("#user-avatar");
+		current_nick = Casada.Q("#username");
 		current_room = "1234";
 		available_rooms = ["La casa de las cariñosas", "Una sala de fitness peculiar...", "La guarida de la rata", "1234"];
-		rooms_datalist = MYCHAT.Q("#available-rooms");
+		rooms_datalist = Casada.Q("#available-rooms");
+		chatscrolls = {"chat1" : 0, "chat2" : 0};
 
 		// CSS variables
 		document.documentElement.style.setProperty('--screen_width', available_width + "px");
 		document.documentElement.style.setProperty('--screen_height', available_height + "px");
 
-		// Custom methods
-		clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+		// OnKeyDown
+		document.addEventListener("keydown", Casada.onKeyDown);
 
 		// Search a chat
-		chat_search_bar.addEventListener("keyup", MYCHAT.onKeyUp);
+		chat_search_bar.addEventListener("keyup", Casada.onKeyUp);
 
 		// Erase search
-		chat_eraser.addEventListener("click", MYCHAT.eraseChatSearch);
+		chat_eraser.addEventListener("click", Casada.eraseChatSearch);
 
 		// Select a chat
-		chats.addEventListener("click", MYCHAT.selectChat);
+		chats.addEventListener("click", Casada.selectChat);
 
 		// Emoji picker
-		MYCHAT.emojiPickerInit();
+		Casada.emojiPickerInit();
 		
 		// Send a message
-		input.addEventListener("keydown", MYCHAT.onKeyDown);
+		input.addEventListener("keydown", Casada.onKeyDown);
 
 		// Menu dragger
-		menu_dragger.addEventListener("mousedown", MYCHAT.dragMenu);
+		menu_dragger.addEventListener("mousedown", Casada.dragMenu);
 
 		// Open menu
-		new_chat_trigger.addEventListener("click", MYCHAT.openMenu);
+		new_chat_trigger.addEventListener("click", Casada.openMenu);
 
 		// Close menu
-		menu_options.addEventListener("click", MYCHAT.closeMenu);
+		menu_options.addEventListener("click", Casada.closeMenu);
 
 		// Change avatar
-		avatar_uploader.addEventListener("click", MYCHAT.changeAvatar);
+		avatar_uploader.addEventListener("click", Casada.changeAvatar);
 
 		// Reset changes
-		reset_changes.addEventListener("click", MYCHAT.resetSetup);
+		reset_changes.addEventListener("click", Casada.resetSetup);
 
 		// Save setup
-		apply_changes.addEventListener("click", MYCHAT.saveSetup);
+		apply_changes.addEventListener("click", Casada.saveSetup);
 
 		// Load rooms
-		MYCHAT.loadRooms();
+		Casada.loadRooms();
 	},
 
 	onKeyDown: function(event)
@@ -108,13 +134,14 @@ var MYCHAT =
 		{		
 			if(event.code == "Enter")
 			{
-				MYCHAT.sendMessage();
+				Casada.sendMessage();
 			}
 		}
 		
 		if(event.code == "Escape")
 		{
-			MYCHAT.hideEmojiPicker();
+			Casada.hideEmojiPicker();
+
 		}	 
 		
 	},
@@ -123,7 +150,7 @@ var MYCHAT =
 	{
 		if(this.id == "chat-search-bar")
 		{
-			MYCHAT.filterChats();
+			Casada.filterChats();
 		}
 
 	},
@@ -134,19 +161,22 @@ var MYCHAT =
 		if (input.value == '') return;
 
 		// Fetch current conversation
-		const current_conversation = MYCHAT.Q(".grid-conversations .current")
+		const current_conversation = Casada.Q(".grid-conversations .current")
 
 		// Fetch the current conversation type
 		const conversation_classes = current_conversation.classList;
 
-		// Fetch private or group template
-		const message_template = conversation_classes.contains("private") ? MYCHAT.Q("#private-message-template") : MYCHAT.Q("#group-message-template");
+		// Fetch last conversation child
+		const last_child = current_conversation.querySelector(".conversation").lastElementChild;
+
+		// Fetch proper template
+		const message_template = conversation_classes.contains("private") ? Casada.Q("#private-message-template") : (last_child.classList.contains("user-message-layout") ? Casada.Q("#concurrent-group-message-template") : Casada.Q("#new-group-message-template"));
 
 		// Clone template
 		var message_box = message_template.cloneNode(true);
 
-		// Set username in case of group template
-		if (conversation_classes.contains("group")) message_box.querySelector(".username").innerText = current_nick;
+		// Set avatar in case of new group message from the user
+		if (last_child.classList.contains("people-message-layout") ) message_box.querySelector(".avatar").src = current_avatar.src;		
 
 		// Set input box text value to template
 		message_box.querySelector(".message-content").innerText = input.value;
@@ -156,7 +186,7 @@ var MYCHAT =
 		message_box.querySelector(".message-time").innerText = date.getHours().toString().padStart(2,"0") + ":" + date.getMinutes().toString().padStart(2, "0");
 
 		// Add template to the DOM
-		current_conversation.querySelector(".conversation").appendChild(message_box);
+		last_child.classList.contains("user-message-layout") ? last_child.appendChild(message_box) : current_conversation.querySelector(".conversation").appendChild(message_box);
 
 		//Delete template old attributes
 		message_box.removeAttribute('style');
@@ -226,11 +256,11 @@ var MYCHAT =
 
 	selectChat:function(event)
 	{
-		const current_chat = MYCHAT.Q("#chats .current");
-		const current_conversation = MYCHAT.Q(".grid-conversations .current");
+		const current_chat = Casada.Q("#chats .current");
+		const current_conversation = Casada.Q(".grid-conversations .current");
 		const regex = /chat[1-9]+/;
 		
-		for (const element of event.path)
+		for (const element of event.srcElement.getParents())
 		{
 			if(element.id != undefined && element.id.match(regex) != null)
 			{
@@ -244,7 +274,7 @@ var MYCHAT =
 				current_conversation.classList.replace("current", "not-current");
 
 				// Change to the conversation of the clicked chat
-				MYCHAT.Q("#" + element.id + "-conversation").classList.replace("not-current", "current");
+				Casada.Q("#" + element.id + "-conversation").classList.replace("not-current", "current");
 
 				//End execution
 				break;
@@ -255,22 +285,21 @@ var MYCHAT =
 	emojiPickerInit:function()
 	{
 		// Chat setup
-		MYCHAT.emoji_picker.resizable = false;
-		MYCHAT.emoji_picker.default_placeholder = "Search an emoji...";
-		MYCHAT.emoji_picker.instantiate(MYCHAT.Q("#emoji-picker"));
+		Casada.emoji_picker.resizable = false;
+		Casada.emoji_picker.default_placeholder = "Search an emoji...";
+		Casada.emoji_picker.instantiate(Casada.Q("#emoji-picker"));
 		
 		// Chat callback
-        MYCHAT.emoji_picker.callback = (emoji, closed) => {
+        Casada.emoji_picker.callback = (emoji, closed) => {
             input.value += emoji.emoji;
         };
 
 		// Event listeners
-		MYCHAT.Q(".grid-user-profile").addEventListener("click", MYCHAT.hideEmojiPicker);
-		MYCHAT.Q(".grid-chat-profile").addEventListener("click", MYCHAT.hideEmojiPicker);
-		MYCHAT.Q(".grid-chats").addEventListener("click", MYCHAT.hideEmojiPicker);
-		MYCHAT.Q(".grid-conversations").addEventListener("click", MYCHAT.hideEmojiPicker);
-		MYCHAT.Q("#grid-layout").addEventListener("click", MYCHAT.hideEmojiPicker);
-		document.addEventListener("keydown", MYCHAT.onKeyDown);
+		Casada.Q(".grid-user-profile").addEventListener("click", Casada.hideEmojiPicker);
+		Casada.Q(".grid-chat-profile").addEventListener("click", Casada.hideEmojiPicker);
+		Casada.Q(".grid-chats").addEventListener("click", Casada.hideEmojiPicker);
+		Casada.Q(".grid-conversations").addEventListener("click", Casada.hideEmojiPicker);
+		Casada.Q("#grid-layout").addEventListener("click", Casada.hideEmojiPicker);
 	},
 
 	dragMenu:function(event)
@@ -298,8 +327,8 @@ var MYCHAT =
 			Δy = event.clientY - yi;
 
 			// Set div new position
-			menu.style.left = clamp((menu.offsetLeft + Δx), 0, available_width - menu.offsetWidth - 50) + "px";
-			menu.style.top = clamp((menu.offsetTop + Δy), 0, available_height - menu.offsetHeight - 80) + "px";
+			menu.style.left = (menu.offsetLeft + Δx).clamp(0, available_width - menu.offsetWidth - 50) + "px";
+			menu.style.top = (menu.offsetTop + Δy).clamp(0, available_height - menu.offsetHeight - 80) + "px";
 			
 			//Update intial potition to current potition
 			xi = event.clientX;
@@ -325,14 +354,14 @@ var MYCHAT =
 		menu.style.top = (available_height - menu.offsetHeight) / 2 + "px";
 
 		// Load available rooms
-		MYCHAT.loadRooms();
+		Casada.loadRooms();
 
 	},
 
 	changeAvatar:function()
 	{
 		// File uploader and avatar image
-		file_uploader = MYCHAT.Q("#menu input[type='file']");
+		file_uploader = Casada.Q("#menu input[type='file']");
 
 		// Launch file manager event
 		file_uploader.click();
@@ -371,10 +400,10 @@ var MYCHAT =
 		current_room = new_room.value;
 
 		// Reset setup
-		MYCHAT.resetSetup();
+		Casada.resetSetup();
 
 		// Close menu
-		MYCHAT.closeMenu();
+		Casada.closeMenu();
 	},
 
 	closeMenu:function()
@@ -410,11 +439,11 @@ var MYCHAT =
 
 	showMessage:function()
 	{
-		var template = MYCHAT.Q("#template .msg")
+		var template = Casada.Q("#template .msg")
 		var msg = template.cloneNode(true);
 		msg.querySelector("username").innerText="Javi";
 		msg.querySelector(".content").innerText="lalala";
-		MYCHAT.Q(".logcontent").appendChild(msg);
+		Casada.Q(".logcontent").appendChild(msg);
 
 	},
 
@@ -424,7 +453,8 @@ var MYCHAT =
 
 		if(!emoji_main_div.classList.contains("emojikb-hidden"))
 		{
-			MYCHAT.emoji_picker.toggle_window();
+			Casada.emoji_picker.toggle_window();
+			input.focus();
 		}
 	},
 

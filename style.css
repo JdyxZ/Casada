@@ -111,7 +111,7 @@ body
     overflow-y: auto;
 }
 
-.grid-conversations .fix 
+.grid-conversations > .fix 
 {
     flex: 1 1 auto;
     margin-bottom: 3.5%;
@@ -347,6 +347,11 @@ background-color: var(--light3-dark-color);
     height: auto;
 }
 
+.group .conversation .fix
+{
+    display: flex;
+}
+
 .status-message
 { 
     color:white;
@@ -366,8 +371,6 @@ background-color: var(--light3-dark-color);
 
 .message-content
 {
-    display: inline-block;
-    text-align: justify;
     color: white;
     max-width: fit-content;
     word-break: break-word;
@@ -375,7 +378,6 @@ background-color: var(--light3-dark-color);
 
 .message-time
 {
-    display: inline-block;
     color: #c7c7c7;
     width: fit-content;
     height: fit-content;
@@ -409,82 +411,80 @@ background-color: var(--light3-dark-color);
 }
 
 /*GROUP CONVERSATIONS*/ 
-.group-message-layout
+
+.people-message-layout
 {
     display: grid;
-    max-width: 55%;
-    height: 90%;
-    min-width: calc(var(--screen_width) * 0.5);
-    min-height: calc(var(--screen_width) * 0.25);
-    z-index: 1;
-    margin: 2% 5% 2% 5%;
-    grid-template-columns: minmax(calc(var(--screen_width) * 0.25), 30%) 1fr;
-    grid-template-rows: auto 1fr minmax(calc(var(--screen_height) * 0.055), 4vh); 
-    background-color: #999999;
-
+    height: fit-content;
+    margin-right: auto;
+    margin-bottom: 10px;
+    grid-template-columns: 50px 60%;
 }
 
-.group .user-message
+.people-message-layout .avatar
 {
-    margin: 0% 15px 15px auto;
+    grid-column: 1;
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 100%;
+    margin-left: 20px;
+    transform: translate(0px, -15px);
 }
 
-.group .people-message
+.people-message-layout .username
 {
-    margin: 0% auto 15px 15px;
-    max-width: 55%;
+    color:palevioletred;
+    margin-bottom: 7px;
+}
+
+.people-message-layout .message
+{
+    grid-column: 2;
     width: fit-content;
-}
-
-.group .user-message .message
-{
-    display:inline-block;
-    background-color: var(--featured-color1);
-    padding: 10px 10px 10px 10px;
-    border-radius: 8px 0px 8px 8px;
-}
-
-.group .people-message .message
-{
-    display:inline-block;
     background-color: var(--dark-color);
+    margin-left: 17px;
+    margin-bottom: 5px;
     padding: 10px 10px 10px 10px;
     border-radius: 0px 8px 8px 8px;
 }
 
-.group .user-message .avatar
+.user-message-layout
 {
-    display: inline-block;
+    display: grid;
+    height: fit-content;
+    margin-bottom: 10px;
+    grid-template-columns: auto 60% 50px;
+}
+
+.user-message-layout .avatar
+{
+    grid-column: 3;
     width: 40px;
     height: 40px;
     object-fit: cover;
     border-radius: 100%;
-    margin-right: 5px;
-    margin-bottom: 30px;
+    margin-right: 20px;
+    transform: translate(0px, -15px);
 }
 
-.group .people-message .avatar
+.user-message-layout .username
 {
-    display: inline-block;
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 100%;
-    margin-right: 5px;
-    margin-bottom: 30px;
-}
-
-.group .user-message .username
-{
-    color: aqua;
+    color:rgb(12, 130, 134);
     margin-bottom: 7px;
 }
 
-
-.group .people-message .username
+.user-message-layout .message
 {
-    color:palevioletred;
-    margin-bottom: 7px;
+    grid-column: 2;
+    display: flex;
+    width: fit-content;
+    background-color: var(--featured-color1);
+    margin-left: auto;
+    margin-right: 17px;
+    margin-bottom: 5px;
+    padding: 10px 10px 10px 10px;
+    border-radius: 8px 0px 8px 8px;
 }
 
 /*BANNER*/

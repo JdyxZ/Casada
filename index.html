@@ -77,19 +77,30 @@
                         <div class="status-message">
                             <div class="message"> Group created the 20/05/2020</div>
                         </div>
-                        <div class="people-message">
+                        <div class="people-message-layout">
                             <img src="images/default_avatar.jpg" alt="Avatar" class="avatar"\>
                             <div class="message">
                                 <div class="username"> Haylo </div>
-                                <div class="message-content"> Heyy, bro👊 </div>
-                                <div class="message-time"> 10:42 </div>
+                                <div class="fix">
+                                    <div class="message-content"> Heyy, bro👊 </div>
+                                    <div class="message-time"> 10:42 </div>
+                                </div>
+                            </div>
+                            <div class="message">
+                                <div class="fix">
+                                    <div class="message-content"> What's up y'all?🥳 </div>
+                                    <div class="message-time"> 10:43 </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="people-message">
+                        <div class="user-message-layout">
+                            <div class="message">
+                                <div class="message-content"> What's up y'all? burundanga in the drink </div>
+                                <div class="message-time"> 10:42 </div>
+                            </div>
                             <img src="images/default_avatar.jpg" alt="Avatar" class="avatar"\>
                             <div class="message">
-                                <div class="username"> Dwyght </div>
-                                <div class="message-content"> What's up y'all?🥳 </div>
+                                <div class="message-content"> I want party fiesta🥳 </div>
                                 <div class="message-time"> 10:43 </div>
                             </div>
                         </div>
@@ -132,17 +143,24 @@
             <div class="message-time"> </div>
         </div>
 
-        <div style="display:none" id="group-message-template" class="user-message">
+        <div style="display:none" id="new-group-message-template" class="user-message-layout">
             <div class="message">
-                <div class="username"></div>
                 <div class="message-content"></div>
                 <div class="message-time"></div>
             </div>
+            <img src="images/default_avatar.jpg" alt="Avatar" class="avatar"\>
         </div>
+
+        <div style="display:none" id="concurrent-group-message-template" class="message">
+            <div class="message-content"></div>
+            <div class="message-time"></div>
+        </div>
+
+        
         
     </div>
 
     <script src="code.js"></script>
-    <script>MYCHAT.init()</script>
+    <script>Casada.init()</script>
 </body>
 </html>
