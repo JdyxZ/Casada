@@ -295,8 +295,7 @@ var Casada =
         };
 
 		// Event listeners
-		grid_children = Casada.Q(".grid-layout").children;
-		for (const grid_element of grid_children)
+		for (const grid_element of Casada.Q(".grid-layout").children)
 		{
 			if(grid_element.className != "grid-input") grid_element.addEventListener("click", Casada.hideEmojiPicker);
 		}

@@ -23,6 +23,7 @@
 - Keep focus on input when we exit the emoji menu.✅
 - Select chat: Keep scroll or scroll down.✅
 - Positionate well the emoji menu. ✅
+- Check where to place || operator to place default values for values that evaluate to false.
 - SillyServer.
 - Sort chats based on the most recent message (with animation?).
 - Unread message status.
