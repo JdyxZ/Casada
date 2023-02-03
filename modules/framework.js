@@ -2,29 +2,34 @@
 /***************** FRAMEWORK *****************/
 
 Document.prototype.get = function(selector)	{
-	const html_element = this.querySelector(selector);
-	if(html_element == null)
+
+	// Get query
+	const query = this.querySelector(selector);
+
+	if(query == null)
 	{
-		console.log(`WARNING: Selector '${selector}' has not been found in the DOM. Returning empty div`);
+		console.log(`WARNING: Selector '${selector}' has not been found in the DOM. Returning an empty div`);
 		return this.createElement("div");
 	}
 	else
 	{
-		return html_element;
+		return query;
 	}
 };
 
 Document.prototype.getAll = function(selector)
 {
-	const html_elements = this.querySelectorAll(selector);
-	if(html_elements == null)
+	// Get query
+	const query = this.querySelectorAll(selector);
+
+	if(query == null)
 	{
-		console.log(`WARNING: Selector '${selector}' has not been found in the DOM. Returning empty div`);
+		console.log(`WARNING: Selector '${selector}' has not been found in the DOM. Returning an empty div`);
 		return this.createElement("div");
 	}
 	else
 	{
-		return html_elements;
+		return query;
 	}
 };
 
@@ -58,29 +63,46 @@ HTMLElement.prototype.getParents = function()
 };
 
 HTMLElement.prototype.get = function(selector)	{
-	const html_element = this.querySelector(selector);
-	if(html_element == null)
+
+	// Get query
+	const query = this.querySelector(selector);
+
+	if (this == null)
 	{
-		console.log(`WARNING: Selector '${selector}' has not been found in the DOM. Returning empty div`);
-		return this.createElement("div");
+		console.log("WARNING: The HTML Element you are trying to use is null");
+		return null;
+	}
+	else if (query == null)
+	{
+		console.log(`WARNING: Selector '${selector}' has not been found in the DOM. Returning an empty div`);
+		return this.appendChild(document.createElement("div"));
 	}
 	else
 	{
-		return html_element;
+		return query;
 	}
 };
 
 HTMLElement.prototype.getAll = function(selector)	{
-	const html_elements = this.querySelectorAll(selector);
-	if(html_elements == null)
+
+	// Get query
+	const query = this.querySelectorAll(selector);
+
+	if (this == null)
 	{
-		console.log(`WARNING: Selector '${selector}' has not been found in the DOM. Returning empty div`);
-		return this.createElement("div");
+		console.log("WARNING: The HTML Element you are trying to use is null");
+		return null;
+	}
+	else if (query == null)
+	{
+		console.log(`WARNING: Selector '${selector}' has not been found in the DOM. Returning an empty div`);
+		return this.appendChild(document.createElement("div"));
 	}
 	else
 	{
-		return html_elements;
+		return query;
 	}
+
 };
 
 HTMLElement.prototype.when = function(event, callback)	{

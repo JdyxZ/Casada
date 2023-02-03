@@ -18,7 +18,6 @@ var Casada =
 	chat_search_bar : document.get("#chat-search-bar"),
 	chat_eraser : document.get("#chat-eraser"),
 	chats : document.get("#chats"),
-	chats_children : document.getAll("#chats > div"),
 	conversations : document.get("#conversations"),
 
 	// New chat menu
@@ -41,10 +40,11 @@ var Casada =
 	client: new SillyClient(),
 
 	//User
-	user: 
+	user : 
 	{
 		avatar : document.get("#user-avatar"),
 		nick : document.get("#username"),
+		id : 0,
 	},	
 
 	// Rooms
@@ -59,13 +59,13 @@ var Casada =
 	},
 
 	// Scroll
-	conversation_scrolls : {"chat1" : 0, "chat2" : 0},
+	conversation_scrolls : {},
 
 	// Templates
 	chat_template : document.get("#chat-template"),
 	conversation_template: document.get("#conversation-template"),
-	private_messsage_template : document.get("#chat-template"),
-	group_message_template: document.get("#group-message-template"),
+	private_message_template : document.get("#private-message-template"),
+	new_group_message_template: document.get("#new-group-message-template"),
 	concurrent_group_message_template: document.get("#concurrent-group-message-template"),
 
 	init: function()
@@ -152,6 +152,9 @@ var Casada =
 
 	onServerConnection: function()
 	{
+		// Inform the user the connection has been successfully established
+		console.log(`Connection with the server in room ${this.current_room.name} successfully established`);
+
 		// Set new current room
 		this.current_room.name = this.client.room.name;
 
@@ -159,10 +162,7 @@ var Casada =
 		this.loadRooms.bind(this)();
 
 		// Create chats
-		this.createChats.bind(this)();
-
-		// Inform the user the connection has been successfully established
-		console.log(`Connection with the server in room ${this.current_room.name} successfully established`);
+		this.createContent.bind(this)();
 	},
 
 	onServerFail: function()
@@ -184,14 +184,20 @@ var Casada =
 		console.log(`Your id is ${id}`);
 	},
 
-	onServerUserJoin: function(user_id)
+	onServerUserJoin: function(client_id)
 	{
-		console.log(`A new user with id ${user_id} has joined the room`);
+		// Inform the user a new client has joined the room
+		console.log(`A new user with id ${client_id} has joined the room`);
+
+		// Create a new private chat and conversation
+		this.createPrivateContent(client_id);
+		
 	},
 
-	onServerUserLeft: function(user_id)
+	onServerUserLeft: function(client_id)
 	{
-		console.log(`The user with id ${user_id} has left the room`);
+		// Inform the user a new client has left the room
+		console.log(`The user with id ${client_id} has left the room`);
 	},
 
 	onServerRoomInfo: function(room_info)
@@ -267,7 +273,7 @@ var Casada =
 		this.setServerConnection(this.server_address, room_name);
 	},
 
-	createChats: async function()
+	createContent: async function()
 	{
 		// Fetch current room info
 		const room_info = await this.serverGetRoomInfo.bind(this)(this.current_room.name);
@@ -278,16 +284,19 @@ var Casada =
 		// Create private chats and conversations
 		for(const client_id of room_info["clients"])
 		{
-			this.createPrivateContent(client_id);
+			if(client_id != this.user.id)
+				this.createPrivateContent.bind(this)(client_id);
 		}
-		
+
+		// Init scrolls
+		this.initScrolls.bind(this)();
 	},
 
 	createRoomContent: function()
 	{
 		// Clone templates
-		let new_chat = this.chat_template.clone(true);
-		let new_conversation = this.conversation_template.clone(true);
+		let new_chat = this.chat_template.cloneNode(true);
+		let new_conversation = this.conversation_template.cloneNode(true);
 
 		// Get chat contents
 		let chat_avatar = new_chat.get(".avatar");
@@ -296,8 +305,8 @@ var Casada =
 
 		// Set chat contents
 		chat_avatar.src = "images/default_group_avatar.jpeg";
-		chat_username = this.current_room.name;
-		chat_last_message = "Last sent message";
+		chat_username.innerText = this.current_room.name;
+		chat_last_message.innerText = "Last sent message";
 
 		// Set chat id and class
 		new_chat.id = "room-chat";
@@ -319,8 +328,8 @@ var Casada =
 	createPrivateContent(client_id)
 	{
 		// Clone templates
-		let new_chat = this.chat_template.clone(true);
-		let new_conversation = this.conversation_template.clone(true);
+		let new_chat = this.chat_template.cloneNode(true);
+		let new_conversation = this.conversation_template.cloneNode(true);
 
 		// Get chat contents
 		let chat_avatar = new_chat.get(".avatar");
@@ -328,9 +337,9 @@ var Casada =
 		let chat_last_message = new_chat.get(".info .last-message");
 
 		// Set chat contents
-		chat_avatar.src = "images/default_avatar.jpeg";
-		chat_username = client_id;
-		chat_last_message = "Last sent message";
+		chat_avatar.src = "images/default_avatar.jpg";
+		chat_username.innerText = client_id;
+		chat_last_message.innerText = "Last sent message";
 
 		// Set chat id and class
 		new_chat.id = "chat-" + client_id;
@@ -347,6 +356,15 @@ var Casada =
 		// Show new elements
 		new_chat.show();
 		new_conversation.show();
+	},
+
+	initScrolls: function()
+	{
+		for (const conversation of this.conversations.children)
+		{
+			if(conversation.id != "")
+				this.conversation_scrolls[conversation.id] = "0";
+		}
 	},
 
 	onKeyDown: function(event)
@@ -407,13 +425,32 @@ var Casada =
 		const last_child = current_conversation.get(".conversation").lastElementChild;
 
 		// Fetch proper template
-		const message_template = conversation_classes.contains("private") ? this.private_messsage_template : (last_child.classList.contains("user-message-layout") ? this.concurrent_group_message_template : this.group_message_template);
+		let message_template;
+		switch(true)
+		{
+			case conversation_classes.contains("private"):
+				message_template = this.private_message_template;
+				break;
+			case last_child == null:
+				message_template = this.new_group_message_template;
+				break;
+			case last_child.classList.contains("user-message-layout"):
+				message_template = this.concurrent_group_message_template;
+				break;
+			default:
+				message_template = this.new_group_message_template;
+				break;
+		}
 
 		// Clone template
 		var message_box = message_template.cloneNode(true);
 
 		// Set avatar in case of new group message from the user
-		if (last_child.classList.contains("people-message-layout") ) message_box.get(".avatar").src = this.user.avatar.src;		
+		switch(true)
+		{
+
+		}
+		if ((last_child == null && conversation_classes.contains("group")) || last_child.classList.contains("people-message-layout") ) message_box.get(".avatar").src = this.user.avatar.src;		
 
 		// Set input box text value to template
 		message_box.get(".message-content").innerText = this.input.value;
@@ -423,7 +460,18 @@ var Casada =
 		message_box.get(".message-time").innerText = date.getTime();
 
 		// Add template to the DOM
-		last_child.classList.contains("user-message-layout") ? last_child.appendChild(message_box) : current_conversation.get(".conversation").appendChild(message_box);
+		switch(true)
+		{
+			case last_child == null:
+				current_conversation.get(".conversation").appendChild(message_box);
+				break;
+			case last_child.classList.contains("user-message-layout"):
+				last_child.appendChild(message_box);
+				break;
+			default:
+				current_conversation.get(".conversation").appendChild(message_box);
+				break;
+		}
 
 		//Delete template old attributes
 		message_box.removeAttribute('style');
@@ -460,7 +508,7 @@ var Casada =
 		}
 
 		// Filter chats
-		this.chats_children.forEach(function(element){
+		document.getAll("#chats > div").forEach(function(element){
 
 			if(query.length == 0)
 			{
@@ -489,18 +537,17 @@ var Casada =
 		this.chat_search_bar.value = "";
 		this.chat_eraser.classList.replace("eraser-showing", "eraser-hidden");
 		this.search_bar_box.style.marginBottom = "10px";
-		this.chats_children.forEach( (element) => { 
+		document.getAll("#chats > div").forEach( (element) => { 
 			element.show(); 
 		});
 	},
 
 	selectChat:function(event)
 	{
-		const regex = /chat[1-9]+/;
+		// Declare some vars
+		const regex = /room-chat|chat-[1-9]+/;
 		const current_chat = chats.get(".current");
 		const current_conversation = conversations.get(".current");
-		const regex_result = current_conversation.id.match(regex);
-		const current_conversation_id = regex_result != null && regex_result.length == 1 ? regex_result[0] : null;
 		
 		for (const element of event.srcElement.getParents())
 		{
@@ -513,10 +560,10 @@ var Casada =
 				element.classList.replace("chat", "current");
 
 				// Fetch the new conversation
-				const new_conversation = document.get(`#${element.id}-conversation`);
+				const new_conversation = document.get(`#${element.id.replace("chat", "conversation")}`);
 
 				// Save current scroll
-				if(current_conversation_id != null) this.conversation_scrolls[current_conversation_id] = current_conversation.parentElement.scrollTop;
+				if(current_conversation.id != null) this.conversation_scrolls[current_conversation.id] = current_conversation.parentElement.scrollTop;
 
 				// Swap current conversation to not selected
 				current_conversation.classList.replace("current", "not-current");
@@ -525,7 +572,7 @@ var Casada =
 				new_conversation.classList.replace("not-current", "current");
 
 				// Set clicked conversation scroll
-				new_conversation.parentElement.scroll(0, this.conversation_scrolls[element.id]);
+				new_conversation.parentElement.scroll(0, this.conversation_scrolls[element.id.replace("chat", "conversation")]);
 
 				//End execution
 				break;
