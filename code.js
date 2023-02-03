@@ -421,6 +421,62 @@ var Casada =
 		// Fetch the current conversation type
 		const conversation_classes = current_conversation.classList;
 
+		// Send private or public message
+		switch(true)
+		{
+			case conversation_classes.contains("private"):
+				this.sendPrivateMessage.bind(this)();
+				break;
+			case conversation_classes.contains("group"):
+				this.sendPublicMessage.bind(this)();
+				break;
+		}
+
+		// Send message to the chat server
+		this.client.sendMessage(this.input.value);
+
+		// Clean input box
+		this.input.value = ''
+	},
+
+	sendPrivateMessage: function()
+	{
+		// Fetch current conversation
+		const current_conversation = conversations.get(".current");
+
+		// Fetch private message template
+		const message_template = this.private_message_template;
+
+		// Clone template
+		var message_box = message_template.cloneNode(true);	
+
+		// Set input box text value to the template
+		message_box.get(".message-content").innerText = this.input.value;
+
+		// Set current time to the template
+		const date = new Date();
+		message_box.get(".message-time").innerText = date.getTime();
+
+		// Add template to the DOM
+		current_conversation.get(".conversation").appendChild(message_box);		
+
+		//Delete template old attributes
+		message_box.removeAttribute('style');
+		message_box.removeAttribute('id');
+
+		// Show new message
+		message_box.style.display = ''
+
+		//Update scrollbar focus
+		message_box.scrollIntoView();
+
+	},
+
+	sendPublicMessage: function()
+	{
+		// Fetch current conversation
+		const current_conversation = conversations.get(".current");
+
 		// Fetch last conversation child
 		const last_child = current_conversation.get(".conversation").lastElementChild;
 
@@ -428,9 +484,6 @@ var Casada =
 		let message_template;
 		switch(true)
 		{
-			case conversation_classes.contains("private"):
-				message_template = this.private_message_template;
-				break;
 			case last_child == null:
 				message_template = this.new_group_message_template;
 				break;
@@ -445,17 +498,13 @@ var Casada =
 		// Clone template
 		var message_box = message_template.cloneNode(true);
 
-		// Set avatar in case of new group message from the user
-		switch(true)
-		{
+		// Set avatar
+		if ((last_child == null) || last_child.classList.contains("people-message-layout") ) message_box.get(".avatar").src = this.user.avatar.src;		
 
-		}
-		if ((last_child == null && conversation_classes.contains("group")) || last_child.classList.contains("people-message-layout") ) message_box.get(".avatar").src = this.user.avatar.src;		
-
-		// Set input box text value to template
+		// Set input box text value to the template
 		message_box.get(".message-content").innerText = this.input.value;
 
-		// Set current time to template
+		// Set current time to the template
 		const date = new Date();
 		message_box.get(".message-time").innerText = date.getTime();
 
@@ -482,12 +531,6 @@ var Casada =
 
 		//Update scrollbar focus
 		message_box.scrollIntoView();
-
-		// Send message to the chat server
-		this.client.sendMessage(this.input.value);
-
-		// Clean input box
-		this.input.value = ''
 	},
 
 	filterChats:function()
@@ -589,7 +632,7 @@ var Casada =
 		
 		// Chat callback
         this.emoji_picker.callback = (emoji, closed) => {
-            input.value += emoji.emoji;
+            this.input.value += emoji.emoji;
         };
 
 		// Event listeners
