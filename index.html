@@ -55,7 +55,7 @@
                     </div>
                 </div>
             </div>
-            <div class="grid-conversations">
+            <div id="conversations" class="grid-conversations">
                 <div class="fix"></div>
                 <div id="chat1-conversation" class="current private">
                     <div class="conversation">
@@ -147,12 +147,25 @@
         </div>
 
         <!--- Templates -->
-        <div style="display:none" id="private-message-template" class="user-message">
+        <div id="chat-template">
+            <img src="" alt="Avatar" class="avatar"\>
+            <div class="info">
+                <div class="username text"></div>
+                <div class="last-message light-text"></div>
+                <div class="footer"></div>
+            </div>
+        </div>
+
+        <div id="conversation-template">
+            <div class="conversation"></div>
+        </div>
+
+        <div id="private-message-template" class="user-message">
             <div class="message-content"> </div>
             <div class="message-time"> </div>
         </div>
 
-        <div style="display:none" id="new-group-message-template" class="user-message-layout">
+        <div id="new-group-message-template" class="user-message-layout">
             <div class="message">
                 <div class="message-content"></div>
                 <div class="message-time"></div>
@@ -160,7 +173,7 @@
             <img src="images/default_avatar.jpg" alt="Avatar" class="avatar"\>
         </div>
 
-        <div style="display:none" id="concurrent-group-message-template" class="message">
+        <div id="concurrent-group-message-template" class="message"> 
             <div class="message-content"></div>
             <div class="message-time"></div>
         </div>

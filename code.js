@@ -19,6 +19,7 @@ var Casada =
 	chat_eraser : document.get("#chat-eraser"),
 	chats : document.get("#chats"),
 	chats_children : document.getAll("#chats > div"),
+	conversations : document.get("#conversations"),
 
 	// New chat menu
 	menu : document.get("#menu"),
@@ -44,7 +45,6 @@ var Casada =
 	{
 		avatar : document.get("#user-avatar"),
 		nick : document.get("#username"),
-		room : "1234" 
 	},	
 
 	// Rooms
@@ -52,8 +52,21 @@ var Casada =
 	room_list_index : 0,
 	available_rooms : [],
 
+	current_room :
+	{
+		name: "",
+		clients: [],
+	},
+
 	// Scroll
 	conversation_scrolls : {"chat1" : 0, "chat2" : 0},
+
+	// Templates
+	chat_template : document.get("#chat-template"),
+	conversation_template: document.get("#conversation-template"),
+	private_messsage_template : document.get("#chat-template"),
+	group_message_template: document.get("#group-message-template"),
+	concurrent_group_message_template: document.get("#concurrent-group-message-template"),
 
 	init: function()
 	{
@@ -101,10 +114,10 @@ var Casada =
 		this.avatar_uploader.when("click", this.changeAvatar.bind(this));
 
 		// Previous room
-		this.previous_room.when("click", () => {this.changeRoom(this.room_list_index - 1);});
+		this.previous_room.when("click", () => {this.showRoom(this.room_list_index - 1);});
 
 		// Next room
-		this.next_room.when("click", () => {this.changeRoom(this.room_list_index + 1);});
+		this.next_room.when("click", () => {this.showRoom(this.room_list_index + 1);});
 
 		// Menu room
 		this.menu_room.when("keyup", this.onKeyUp);
@@ -119,7 +132,7 @@ var Casada =
 	initClient: function()
 	{
 		// Server connection
-		this.setServerConnection();
+		this.setServerConnection(this.server_address, this.default_room);
 
 		// Server callbacks
 		this.client.on_connect = this.onServerConnection.bind(this);
@@ -132,18 +145,24 @@ var Casada =
 		this.client.on_message = this.onServerMessageReceived.bind(this);
 	},
 
-	setServerConnection: function(room)
+	setServerConnection: function(server_address, room_name)
 	{
-		this.client.connect(this.server_address, this.default_room);
+		this.client.connect(server_address, room_name);
 	},
 
 	onServerConnection: function()
 	{
-		// Inform the user the connection has been successfully established
-		console.log("Connection with the server successfully established");
+		// Set new current room
+		this.current_room.name = this.client.room.name;
 
 		// Load rooms
 		this.loadRooms.bind(this)();
+
+		// Create chats
+		this.createChats.bind(this)();
+
+		// Inform the user the connection has been successfully established
+		console.log(`Connection with the server in room ${this.current_room.name} successfully established`);
 	},
 
 	onServerFail: function()
@@ -205,24 +224,33 @@ var Casada =
 		});
 	},
 
+	serverGetRoomInfo: function(room_name)
+	{
+		return new Promise( (resolve,fail) => 
+		{
+			// Get rooms list
+			this.client.getRoomInfo(room_name, (room_info) => 
+			{				
+				// Resolve promise
+				resolve(room_info);
+			});
+
+		});
+	},
+
 	loadRooms: async function()
 	{
 		// Fetch room list
-		await this.serverGetRoomList();
+		await this.serverGetRoomList.bind(this)();
 
 		// Show first room
-		this.changeRoom(0);
+		this.showRoom(0);
 	},
 	
-	changeRoom: function(new_room)
+	showRoom: function(new_room)
 	{
 		// Get number of available rooms
 		const room_list_length = Object.keys(this.available_rooms).length
-
-		if(room_list_length == 0)
-		{
-
-		}
 
 		// Range new room index
 		new_room = new_room < 0 ? room_list_length - 1 : (new_room > room_list_length - 1 ? 0 : new_room);
@@ -231,6 +259,94 @@ var Casada =
 		this.room_list_index = new_room;
 		this.menu_room.value = Object.keys(this.available_rooms)[this.room_list_index];
 		this.room_people.innerText = Object.values(this.available_rooms)[this.room_list_index];
+	},
+
+	changeRoom: function(room_name)
+	{
+		// Set new connection
+		this.setServerConnection(this.server_address, room_name);
+	},
+
+	createChats: async function()
+	{
+		// Fetch current room info
+		const room_info = await this.serverGetRoomInfo.bind(this)(this.current_room.name);
+
+		// Create room group chat and conversation
+		this.createRoomContent.bind(this)();
+
+		// Create private chats and conversations
+		for(const client_id of room_info["clients"])
+		{
+			this.createPrivateContent(client_id);
+		}
+		
+	},
+
+	createRoomContent: function()
+	{
+		// Clone templates
+		let new_chat = this.chat_template.clone(true);
+		let new_conversation = this.conversation_template.clone(true);
+
+		// Get chat contents
+		let chat_avatar = new_chat.get(".avatar");
+		let chat_username = new_chat.get(".info .username");
+		let chat_last_message = new_chat.get(".info .last-message");
+
+		// Set chat contents
+		chat_avatar.src = "images/default_group_avatar.jpeg";
+		chat_username = this.current_room.name;
+		chat_last_message = "Last sent message";
+
+		// Set chat id and class
+		new_chat.id = "room-chat";
+		new_chat.className = "current";
+
+		// Set conversation id and class
+		new_conversation.id = "room-conversation";
+		new_conversation.className = "current group";
+
+		// Append new chat and conversation to the doom
+		this.chats.appendChild(new_chat);
+		this.conversations.appendChild(new_conversation);
+
+		// Show new elements
+		new_chat.show();
+		new_conversation.show();
+	},
+
+	createPrivateContent(client_id)
+	{
+		// Clone templates
+		let new_chat = this.chat_template.clone(true);
+		let new_conversation = this.conversation_template.clone(true);
+
+		// Get chat contents
+		let chat_avatar = new_chat.get(".avatar");
+		let chat_username = new_chat.get(".info .username");
+		let chat_last_message = new_chat.get(".info .last-message");
+
+		// Set chat contents
+		chat_avatar.src = "images/default_avatar.jpeg";
+		chat_username = client_id;
+		chat_last_message = "Last sent message";
+
+		// Set chat id and class
+		new_chat.id = "chat-" + client_id;
+		new_chat.className = "chat";
+
+		// Set conversation id and class
+		new_conversation.id = "conversation-" + client_id;
+		new_conversation.className = "not-current private";
+
+		// Append new chat and conversation to the doom
+		this.chats.appendChild(new_chat);
+		this.conversations.appendChild(new_conversation);
+
+		// Show new elements
+		new_chat.show();
+		new_conversation.show();
 	},
 
 	onKeyDown: function(event)
@@ -282,7 +398,7 @@ var Casada =
 		if (this.input.value == '') return;
 
 		// Fetch current conversation
-		const current_conversation = document.get(".grid-conversations .current")
+		const current_conversation = conversations.get(".current");
 
 		// Fetch the current conversation type
 		const conversation_classes = current_conversation.classList;
@@ -291,7 +407,7 @@ var Casada =
 		const last_child = current_conversation.get(".conversation").lastElementChild;
 
 		// Fetch proper template
-		const message_template = conversation_classes.contains("private") ? document.get("#private-message-template") : (last_child.classList.contains("user-message-layout") ? document.get("#concurrent-group-message-template") : document.get("#new-group-message-template"));
+		const message_template = conversation_classes.contains("private") ? this.private_messsage_template : (last_child.classList.contains("user-message-layout") ? this.concurrent_group_message_template : this.group_message_template);
 
 		// Clone template
 		var message_box = message_template.cloneNode(true);
@@ -381,8 +497,8 @@ var Casada =
 	selectChat:function(event)
 	{
 		const regex = /chat[1-9]+/;
-		const current_chat = document.get("#chats .current");
-		const current_conversation = document.get(".grid-conversations .current");
+		const current_chat = chats.get(".current");
+		const current_conversation = conversations.get(".current");
 		const regex_result = current_conversation.id.match(regex);
 		const current_conversation_id = regex_result != null && regex_result.length == 1 ? regex_result[0] : null;
 		
@@ -532,7 +648,7 @@ var Casada =
 		// Save changes
 		this.user.avatar.src = this.menu_avatar.src;
 		this.user.nick.innerText = this.menu_nick.value;
-		this.user.room = this.menu_room.value;
+		this.current_room.name = this.menu_room.value;
 
 		// Reset setup
 		this.resetSetup();

@@ -103,7 +103,7 @@ body
 {
     display: flex;
     flex-direction: column;
-    background-image: url("images/wallpaper_chat_6.png");
+    background-image: url("images/wallpaper_chat_5.png");
     background-size: cover;
     grid-column: 2;
     grid-row: 2;
@@ -518,7 +518,7 @@ background-color: var(--light3-dark-color);
     padding-left: 2%;
 }
 
-/* ROOM AND AVATAR CHOOSE */
+/* AVATAR, NICK, ROOM SETTING MENU */
 
 /* SUPER CENTERED */
 .menu-grid
@@ -707,4 +707,10 @@ background-color: var(--light3-dark-color);
 #apply-changes
 {
     background-color: var(--featured-color2);
+}
+
+/* TEMPLATES */
+#private-message-template, #new-group-message-template, #concurrent-group-message-template, #chat-template, #conversation-template
+{
+    display:none;
 }
