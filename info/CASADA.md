@@ -25,6 +25,11 @@
 - Positionate well the emoji menu. ✅
 - Check where to place || operator to place default values for values that evaluate to false.
 - SillyServer.
+    - Load rooms.
+    - Room change. ✅
+    - Send and receive messages.
+    - Status messages.
+    - Send log.
 - Sort chats based on the most recent message (with animation?).
 - Unread message status.
 - Cross animation.

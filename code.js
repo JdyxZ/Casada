@@ -31,7 +31,7 @@ var Casada =
 	menu_room : document.get("#menu-room"),
 	previous_room : document.get("#menu .previous-room"),
 	next_room : document.get("#menu .next-room"),
-	people_room : document.get("#menu .room-people"),
+	room_people : document.get("#menu .room-people div"),
 	reset_changes : document.get("#reset-changes"),
 	apply_changes : document.get("#apply-changes"),
 
@@ -48,6 +48,8 @@ var Casada =
 	},	
 
 	// Rooms
+	default_room : "Casada",
+	room_list_index : 0,
 	available_rooms : [],
 
 	// Scroll
@@ -67,9 +69,6 @@ var Casada =
 
 		// SillyClient
 		this.initClient.bind(this)();
-
-		// Load rooms
-		this.loadRooms.bind(this)();
 	},
 
 	initEventsListeners: function()
@@ -101,6 +100,15 @@ var Casada =
 		// Change avatar
 		this.avatar_uploader.when("click", this.changeAvatar.bind(this));
 
+		// Previous room
+		this.previous_room.when("click", () => {this.changeRoom(this.room_list_index - 1);});
+
+		// Next room
+		this.next_room.when("click", () => {this.changeRoom(this.room_list_index + 1);});
+
+		// Menu room
+		this.menu_room.when("keyup", this.onKeyUp);
+
 		// Reset changes
 		this.reset_changes.when("click", this.resetSetup.bind(this));
 
@@ -126,13 +134,16 @@ var Casada =
 
 	setServerConnection: function(room)
 	{
-		this.client.connect(this.server_address, this.user.room);
+		this.client.connect(this.server_address, this.default_room);
 	},
 
 	onServerConnection: function()
 	{
 		// Inform the user the connection has been successfully established
 		console.log("Connection with the server successfully established");
+
+		// Load rooms
+		this.loadRooms.bind(this)();
 	},
 
 	onServerFail: function()
@@ -200,12 +211,26 @@ var Casada =
 		await this.serverGetRoomList();
 
 		// Show first room
-		for (const [room_name, num_people] of Object.entries(this.available_rooms))
+		this.changeRoom(0);
+	},
+	
+	changeRoom: function(new_room)
+	{
+		// Get number of available rooms
+		const room_list_length = Object.keys(this.available_rooms).length
+
+		if(room_list_length == 0)
 		{
-			const option = document.createElement("option");
-			option.innerText = `Room: ${room_name} \t People: ${num_people}`;
-			this.rooms_datalist.appendChild(option);
+
 		}
+
+		// Range new room index
+		new_room = new_room < 0 ? room_list_length - 1 : (new_room > room_list_length - 1 ? 0 : new_room);
+
+		// Set new room
+		this.room_list_index = new_room;
+		this.menu_room.value = Object.keys(this.available_rooms)[this.room_list_index];
+		this.room_people.innerText = Object.values(this.available_rooms)[this.room_list_index];
 	},
 
 	onKeyDown: function(event)
@@ -243,6 +268,10 @@ var Casada =
 		if(this.id == "chat-search-bar")
 		{
 			Casada.filterChats();
+		}
+		else if(this.id == "menu-room")
+		{
+			Casada.room_people.innerText = "0";
 		}
 
 	},
@@ -488,6 +517,7 @@ var Casada =
 		this.menu_avatar.src = "images/default_avatar.jpg";
 		this.menu_nick.value = "";
 		this.menu_room.value = "";
+		this.room_people.innerText = "0";
 	},
 
 	saveSetup:function()
@@ -516,9 +546,6 @@ var Casada =
 		// Hide menu
 		this.menu_grid.style.zIndex = "0";
 		this.menu_grid.hide();
-
-		// Remove all datalist options
-		this.rooms_datalist.replaceChildren();
 	},
 
 	hideEmojiPicker:function(event)

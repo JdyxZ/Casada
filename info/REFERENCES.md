@@ -26,6 +26,7 @@ https://stackoverflow.com/questions/45581361/how-can-i-catch-a-404-error-in-java
 https://stackoverflow.com/questions/15118540/css-text-align-justify-big-spaces 
 https://stackoverflow.com/questions/17642872/refresh-page-and-keep-scroll-position 
 https://stackoverflow.com/questions/17642872/refresh-page-and-keep-scroll-position
+https://stackoverflow.com/questions/44846614/trigger-css-animations-in-javascript
 
 
 
