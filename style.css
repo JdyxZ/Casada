@@ -528,13 +528,13 @@ background-color: var(--light3-dark-color);
     position: absolute;
     height: -webkit-fill-available;
     width: -webkit-fill-available;
-    z-index: 0;
+    z-index: 2;
 }
 
 #menu
 {
     position:absolute;
-    height:calc(var(--screen_height) * 0.7);
+    height: calc(var(--screen_height) * 0.85);
     width:calc(var(--screen_width) * 0.3);
     background-color: var(--menu-color);
     border-radius: 5%;
@@ -554,6 +554,7 @@ background-color: var(--light3-dark-color);
 #menu-dragger
 {
     cursor: move;
+    margin-top: 0.3rem;
 }
 
 #menu-options
@@ -574,8 +575,8 @@ background-color: var(--light3-dark-color);
 
 #menu-avatar
 {
-    width:200px;
-    height: 200px;
+    width: 250px;
+    height: 250px;
     object-fit: cover;
     border-radius: 100%;
     margin-bottom: 3%;
@@ -601,6 +602,7 @@ background-color: var(--light3-dark-color);
 {
     color: white;
     font-size: 17px;
+    margin-top: 3%;
 }
 
 #menu input[type="text"]
@@ -611,8 +613,9 @@ background-color: var(--light3-dark-color);
     text-align: center;
     font-size: 17px;
     background-color: var(--dark-color);
+    margin-left: 2%;
+    margin-right: 2%;
     padding: 2%;
-    margin-bottom: 3%;
     border: none;
     border-radius: 20px;
     transition: all 1s;
@@ -622,6 +625,62 @@ background-color: var(--light3-dark-color);
 {
     color: #912626;
     opacity: 1;
+}
+
+#menu .room-people
+{
+    display: inline-block;
+    width: 150px;
+}
+
+#menu .room-people p
+{
+    color: white;
+    font-family: 'Roboto';
+    font-size: 17px;
+}
+
+
+#menu .room-people div
+{
+    width: auto;
+    background-color: #562658;
+    height: auto;
+    color: white;
+    font-family: 'Roboto';
+    font-size: 17px;
+    border: none;
+    border-radius: 20px;
+    padding: 15px;
+}
+
+#menu .next-room, #menu .previous-room 
+{
+    display: inline-block;
+    width: 5%;
+    height: auto;
+    color: white;
+    font-family: 'Roboto';
+    font-size: 17px;
+    background-color: var(--dark-color);
+    border: none;
+    border-radius: 15px;
+    padding: 10px;
+}
+
+#menu .previous-room .arrow
+{
+    width: 50%;
+    height: auto;
+    object-fit: cover;
+    transform: rotate(180deg);
+}
+
+#menu .next-room .arrow
+{
+    width: 50%;
+    height: auto;
+    object-fit: cover;
 }
 
 #reset-changes, #apply-changes

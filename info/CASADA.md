@@ -29,6 +29,7 @@
 - Unread message status.
 - Cross animation.
 - Checked message.
+- Change the background.
 - Conversation messages search bar.
 - Avatar selector.
 - When click out of the scope of room menu, exit menu.

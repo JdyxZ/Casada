@@ -28,6 +28,10 @@ Document.prototype.getAll = function(selector)
 	}
 };
 
+Document.prototype.when = function(event, callback)	{
+	document.addEventListener(event, callback);
+};
+
 Number.prototype.clamp = function(min, max) 
 {
 	return Math.min(Math.max(this.valueOf(), min), max);
@@ -77,6 +81,10 @@ HTMLElement.prototype.getAll = function(selector)	{
 	{
 		return html_elements;
 	}
+};
+
+HTMLElement.prototype.when = function(event, callback)	{
+	this.addEventListener(event, callback);
 };
 
 HTMLElement.prototype.show = function()

@@ -29,8 +29,15 @@ var Casada =
 	menu_avatar : document.get("#menu-avatar"),
 	menu_nick : document.get("#menu-nick"),
 	menu_room : document.get("#menu-room"),
+	previous_room : document.get("#menu .previous-room"),
+	next_room : document.get("#menu .next-room"),
+	people_room : document.get("#menu .room-people"),
 	reset_changes : document.get("#reset-changes"),
 	apply_changes : document.get("#apply-changes"),
+
+	//SillyClient
+	server_address : "wss://ecv-etic.upf.edu/node/9000/ws",
+	client: new SillyClient(),
 
 	//User
 	user: 
@@ -41,61 +48,173 @@ var Casada =
 	},	
 
 	// Rooms
-	rooms_datalist : document.get("#available-rooms"),
-	available_rooms : ["La casa de las cariñosas", "Una sala de fitness peculiar...", "La guarida de la rata", "1234"],
+	available_rooms : [],
 
 	// Scroll
 	conversation_scrolls : {"chat1" : 0, "chat2" : 0},
 
-	init:function()
+	init: function()
 	{
 		// CSS variables
-		document.documentElement.style.setProperty('--screen_width', Casada.available_width + "px");
-		document.documentElement.style.setProperty('--screen_height', Casada.available_height + "px");
+		document.documentElement.style.setProperty('--screen_width', this.available_width + "px");
+		document.documentElement.style.setProperty('--screen_height', this.available_height + "px");
 
-		// OnKeyDown
-		document.addEventListener("keydown", Casada.onKeyDown);
-
-		// Search a chat
-		Casada.chat_search_bar.addEventListener("keyup", Casada.onKeyUp);
-
-		// Erase search
-		Casada.chat_eraser.addEventListener("click", Casada.eraseChatSearch);
-
-		// Select a chat
-		Casada.chats.addEventListener("click", Casada.selectChat);
+		// Event listeners
+		this.initEventsListeners.bind(this)();
 
 		// Emoji picker
-		Casada.emojiPickerInit();
-		
-		// Send a message
-		Casada.input.addEventListener("keydown", Casada.onKeyDown);
+		this.emojiPickerInit();
 
-		// Menu dragger
-		Casada.menu_dragger.addEventListener("mousedown", Casada.dragMenu);
-
-		// Open menu
-		Casada.new_chat_trigger.addEventListener("click", Casada.openMenu);
-
-		// Close menu
-		Casada.menu_options.addEventListener("click", Casada.closeMenu);
-
-		// Change avatar
-		Casada.avatar_uploader.addEventListener("click", Casada.changeAvatar);
-
-		// Reset changes
-		Casada.reset_changes.addEventListener("click", Casada.resetSetup);
-
-		// Save setup
-		Casada.apply_changes.addEventListener("click", Casada.saveSetup);
+		// SillyClient
+		this.initClient.bind(this)();
 
 		// Load rooms
-		Casada.loadRooms();
+		this.loadRooms.bind(this)();
+	},
+
+	initEventsListeners: function()
+	{
+		// OnKeyDown
+		document.when("keydown", this.onKeyDown);
+
+		// Search a chat
+		this.chat_search_bar.when("keyup", this.onKeyUp);
+
+		// Erase search
+		this.chat_eraser.when("click", this.eraseChatSearch.bind(this));
+
+		// Select a chat
+		this.chats.when("click", this.selectChat.bind(this));
+		
+		// Send a message
+		this.input.when("keydown", this.onKeyDown);
+
+		// Menu dragger
+		this.menu_dragger.when("mousedown", this.dragMenu.bind(this));
+
+		// Open menu
+		this.new_chat_trigger.when("click", this.openMenu.bind(this));
+
+		// Close menu
+		this.menu_options.when("click", this.closeMenu.bind(this));
+
+		// Change avatar
+		this.avatar_uploader.when("click", this.changeAvatar.bind(this));
+
+		// Reset changes
+		this.reset_changes.when("click", this.resetSetup.bind(this));
+
+		// Save setup
+		this.apply_changes.when("click", this.saveSetup.bind(this));
+	},
+
+	initClient: function()
+	{
+		// Server connection
+		this.setServerConnection();
+
+		// Server callbacks
+		this.client.on_connect = this.onServerConnection.bind(this);
+		this.client.on_error = this.onServerFail.bind(this);
+		//this.client.on_close = this.onServerClose(this);
+		this.client.on_ready = this.onServerReady.bind(this);
+		this.client.on_user_connected = this.onServerUserJoin.bind(this);
+		this.client.on_user_disconnected = this.onServerUserLeft.bind(this);
+		//this.client.on_room_info = this.onServerRoomInfo.bind(this);
+		this.client.on_message = this.onServerMessageReceived.bind(this);
+	},
+
+	setServerConnection: function(room)
+	{
+		this.client.connect(this.server_address, this.user.room);
+	},
+
+	onServerConnection: function()
+	{
+		// Inform the user the connection has been successfully established
+		console.log("Connection with the server successfully established");
+	},
+
+	onServerFail: function()
+	{
+		// Alert the user the connection with the server could not been established
+		alert(`The connection to the server address ${this.server_address} has failed`);
+	},
+
+	onServerClose: function()
+	{
+		// Alert the user the server has been shut down
+		alert(`Warning: The server has been shut down`);
+	},
+
+	onServerReady: function(id)
+	{
+		// Assign user ID
+		this.user.id = id;
+		console.log(`Your id is ${id}`);
+	},
+
+	onServerUserJoin: function(user_id)
+	{
+		console.log(`A new user with id ${user_id} has joined the room`);
+	},
+
+	onServerUserLeft: function(user_id)
+	{
+		console.log(`The user with id ${user_id} has left the room`);
+	},
+
+	onServerRoomInfo: function(room_info)
+	{
+		console.log(room_info);
+	},
+
+	onServerMessageReceived: function(user_id, message)
+	{
+		console.log(`The user with id ${user_id} has send the following message \n ${message}`);
+	},
+
+	serverGetRoomList: function()
+	{
+		return new Promise( (resolve,fail) => 
+		{
+			// Set rooms list
+			this.client.getReport((room_report) => 
+			{
+				// Set default rooms in case that get report fails
+				this.available_rooms = room_report.rooms || {
+					"La casa de las cariñosas": "unknown", 
+					"Una sala de fitness peculiar...": "unknown", 
+					"La guarida de la rata": "unknown", 
+					"1234": "unknown"};
+				
+				// Resolve promise
+				resolve();
+			});
+		});
+	},
+
+	loadRooms: async function()
+	{
+		// Fetch room list
+		await this.serverGetRoomList();
+
+		// Show first room
+		for (const [room_name, num_people] of Object.entries(this.available_rooms))
+		{
+			const option = document.createElement("option");
+			option.innerText = `Room: ${room_name} \t People: ${num_people}`;
+			this.rooms_datalist.appendChild(option);
+		}
 	},
 
 	onKeyDown: function(event)
 	{
-		//console.log(event.key);
+		/* 
+		In this case we haven't bound the "this" on purpuse
+		because we want to know info about the object where the callback was attached
+		in order to carry out actions independently.
+		*/
 		
 		if(this.id == "keyboard-input")
 		{		
@@ -115,6 +234,12 @@ var Casada =
 
 	onKeyUp: function(event)
 	{
+		/* 
+		In this case we haven't bound the "this" on purpuse
+		because we want to know info about the object where the callback was attached
+		in order to carry out actions independently.
+		*/
+
 		if(this.id == "chat-search-bar")
 		{
 			Casada.filterChats();
@@ -125,7 +250,7 @@ var Casada =
 	sendMessage: function()
 	{
 		// Check input is not empty
-		if (Casada.input.value == '') return;
+		if (this.input.value == '') return;
 
 		// Fetch current conversation
 		const current_conversation = document.get(".grid-conversations .current")
@@ -143,10 +268,10 @@ var Casada =
 		var message_box = message_template.cloneNode(true);
 
 		// Set avatar in case of new group message from the user
-		if (last_child.classList.contains("people-message-layout") ) message_box.get(".avatar").src = Casada.user.avatar.src;		
+		if (last_child.classList.contains("people-message-layout") ) message_box.get(".avatar").src = this.user.avatar.src;		
 
 		// Set input box text value to template
-		message_box.get(".message-content").innerText = Casada.input.value;
+		message_box.get(".message-content").innerText = this.input.value;
 
 		// Set current time to template
 		const date = new Date();
@@ -165,29 +290,32 @@ var Casada =
 		//Update scrollbar focus
 		message_box.scrollIntoView();
 
+		// Send message to the chat server
+		this.client.sendMessage(this.input.value);
+
 		// Clean input box
-		Casada.input.value = ''
+		this.input.value = ''
 	},
 
 	filterChats:function()
 	{
-		const query = Casada.chat_search_bar.value;
+		const query = this.chat_search_bar.value;
 		const regex = new RegExp(query, "i");
 
 		// Cross icon transition
 		if(query.length > 0)
 		{
-			Casada.chat_eraser.classList.replace("eraser-hidden", "eraser-showing");
-			Casada.search_bar_box.style.marginBottom = "-9px";
+			this.chat_eraser.classList.replace("eraser-hidden", "eraser-showing");
+			this.search_bar_box.style.marginBottom = "-9px";
 		}
 		else
 		{
-			Casada.chat_eraser.classList.replace("eraser-showing", "eraser-hidden");
-			Casada.search_bar_box.style.marginBottom = "10px";
+			this.chat_eraser.classList.replace("eraser-showing", "eraser-hidden");
+			this.search_bar_box.style.marginBottom = "10px";
 		}
 
 		// Filter chats
-		Casada.chats_children.forEach(function(element){
+		this.chats_children.forEach(function(element){
 
 			if(query.length == 0)
 			{
@@ -213,10 +341,10 @@ var Casada =
 
 	eraseChatSearch:function()
 	{
-		Casada.chat_search_bar.value = "";
-		Casada.chat_eraser.classList.replace("eraser-showing", "eraser-hidden");
-		Casada.search_bar_box.style.marginBottom = "10px";
-		Casada.chats_children.forEach( (element) => { 
+		this.chat_search_bar.value = "";
+		this.chat_eraser.classList.replace("eraser-showing", "eraser-hidden");
+		this.search_bar_box.style.marginBottom = "10px";
+		this.chats_children.forEach( (element) => { 
 			element.show(); 
 		});
 	},
@@ -243,7 +371,7 @@ var Casada =
 				const new_conversation = document.get(`#${element.id}-conversation`);
 
 				// Save current scroll
-				if(current_conversation_id != null) Casada.conversation_scrolls[current_conversation_id] = current_conversation.parentElement.scrollTop;
+				if(current_conversation_id != null) this.conversation_scrolls[current_conversation_id] = current_conversation.parentElement.scrollTop;
 
 				// Swap current conversation to not selected
 				current_conversation.classList.replace("current", "not-current");
@@ -252,7 +380,7 @@ var Casada =
 				new_conversation.classList.replace("not-current", "current");
 
 				// Set clicked conversation scroll
-				new_conversation.parentElement.scroll(0, Casada.conversation_scrolls[element.id]);
+				new_conversation.parentElement.scroll(0, this.conversation_scrolls[element.id]);
 
 				//End execution
 				break;
@@ -263,19 +391,19 @@ var Casada =
 	emojiPickerInit:function()
 	{
 		// Chat setup
-		Casada.emoji_picker.resizable = false;
-		Casada.emoji_picker.default_placeholder = "Search an emoji...";
-		Casada.emoji_picker.instantiate(document.get("#emoji-picker"));
+		this.emoji_picker.resizable = false;
+		this.emoji_picker.default_placeholder = "Search an emoji...";
+		this.emoji_picker.instantiate(document.get("#emoji-picker"));
 		
 		// Chat callback
-        Casada.emoji_picker.callback = (emoji, closed) => {
+        this.emoji_picker.callback = (emoji, closed) => {
             input.value += emoji.emoji;
         };
 
 		// Event listeners
 		for (const grid_element of document.get(".grid-layout").children)
 		{
-			if(grid_element.className != "grid-input") grid_element.addEventListener("click", Casada.hideEmojiPicker);
+			if(grid_element.className != "grid-input") grid_element.when("click", this.hideEmojiPicker);
 		}
 	},
 
@@ -304,8 +432,8 @@ var Casada =
 			Δy = event.clientY - yi;
 
 			// Set div new position
-			Casada.menu.style.left = (menu.offsetLeft + Δx).clamp(0, Casada.available_width - menu.offsetWidth - 50) + "px";
-			Casada.menu.style.top = (menu.offsetTop + Δy).clamp(0, Casada.available_height - menu.offsetHeight - 80) + "px";
+			this.menu.style.left = (menu.offsetLeft + Δx).clamp(0, this.available_width - menu.offsetWidth - 50) + "px";
+			this.menu.style.top = (menu.offsetTop + Δy).clamp(0, this.available_height - menu.offsetHeight - 80) + "px";
 			
 			//Update intial potition to current potition
 			xi = event.clientX;
@@ -324,14 +452,14 @@ var Casada =
 	openMenu:function()
 	{
 		// Load menu
-		Casada.menu_grid.style.zIndex = "2";
-		Casada.menu_grid.show();
+		this.menu_grid.style.zIndex = "2";
+		this.menu_grid.show();
 
-		Casada.menu.style.left = (Casada.available_width - menu.offsetWidth) / 2 + "px";
-		Casada.menu.style.top = (Casada.available_height - menu.offsetHeight) / 2 + "px";
+		this.menu.style.left = (this.available_width - menu.offsetWidth) / 2 + "px";
+		this.menu.style.top = (this.available_height - menu.offsetHeight) / 2 + "px";
 
 		// Load available rooms
-		Casada.loadRooms();
+		this.loadRooms();
 
 	},
 
@@ -344,11 +472,11 @@ var Casada =
 		file_uploader.click();
 
 		// Change user avatar
-		file_uploader.addEventListener("change", () =>{
+		file_uploader.when("change", () =>{
 			const reader = new FileReader();
 			reader.readAsDataURL(file_uploader.files[0]);
 			reader.addEventListener("load", () => {
-				menu_avatar.src = reader.result;				
+				this.menu_avatar.src = reader.result;				
 			});
 		});
 
@@ -357,40 +485,40 @@ var Casada =
 
 	resetSetup:function()
 	{
-		Casada.menu_avatar.src = "images/default_avatar.jpg";
-		Casada.menu_nick.value = "";
-		Casada.menu_room.value = "";
+		this.menu_avatar.src = "images/default_avatar.jpg";
+		this.menu_nick.value = "";
+		this.menu_room.value = "";
 	},
 
 	saveSetup:function()
 	{
 		// Check all fields are not empty
-		if(Casada.menu_nick.value == "") Casada.menu_nick.style.border = "2px #912626 solid", Casada.menu_nick.placeholder = "Choose a nick";
-		else Casada.menu_nick.style.border = "none", Casada.menu_nick.placeholder = "";
-		if(Casada.menu_room.value == "") Casada.menu_room.style.border = "2px #912626 solid", Casada.menu_room.placeholder = "Choose a room";
-		else Casada.menu_room.style.border = "none", Casada.menu_room.placeholder = "";
-		if(Casada.menu_nick.value == "" || Casada.menu_room.value == "") return;
+		if(this.menu_nick.value == "") this.menu_nick.style.border = "2px #912626 solid", this.menu_nick.placeholder = "Choose a nick";
+		else this.menu_nick.style.border = "none", this.menu_nick.placeholder = "";
+		if(this.menu_room.value == "") this.menu_room.style.border = "2px #912626 solid", this.menu_room.placeholder = "Choose a room";
+		else this.menu_room.style.border = "none", this.menu_room.placeholder = "";
+		if(this.menu_nick.value == "" || this.menu_room.value == "") return;
 
 		// Save changes
-		Casada.user.avatar.src = menu_avatar.src;
-		Casada.user.nick.innerText = menu_nick.value;
-		Casada.user.room = menu_room.value;
+		this.user.avatar.src = this.menu_avatar.src;
+		this.user.nick.innerText = this.menu_nick.value;
+		this.user.room = this.menu_room.value;
 
 		// Reset setup
-		Casada.resetSetup();
+		this.resetSetup();
 
 		// Close menu
-		Casada.closeMenu();
+		this.closeMenu();
 	},
 
 	closeMenu:function()
 	{
 		// Hide menu
-		Casada.menu_grid.style.zIndex = "0";
-		Casada.menu_grid.hide();
+		this.menu_grid.style.zIndex = "0";
+		this.menu_grid.hide();
 
 		// Remove all datalist options
-		Casada.rooms_datalist.replaceChildren();
+		this.rooms_datalist.replaceChildren();
 	},
 
 	hideEmojiPicker:function(event)
@@ -399,29 +527,8 @@ var Casada =
 
 		if(!emoji_main_div.classList.contains("emojikb-hidden"))
 		{
-			Casada.emoji_picker.toggle_window();
-			Casada.input.focus();
+			this.emoji_picker.toggle_window();
+			this.input.focus();
 		}
-	},
-
-	loadRooms:function()
-	{
-		for (const room of Casada.available_rooms)
-		{
-			const option = document.createElement("option");
-			option.innerText = room;
-
-			Casada.rooms_datalist.appendChild(option);
-		}
-	},
-
-	changeRoom:function()
-	{
-		// TODO
-	},
-
-	onUserJoin:function()
-	{
-		// TODO
 	},
 }
