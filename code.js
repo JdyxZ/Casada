@@ -137,7 +137,7 @@ var Casada =
 		// Server callbacks
 		this.client.on_connect = this.onServerConnection.bind(this);
 		this.client.on_error = this.onServerFail.bind(this);
-		//this.client.on_close = this.onServerClose(this);
+		this.client.on_close = this.onServerClose(this);
 		this.client.on_ready = this.onServerReady.bind(this);
 		this.client.on_user_connected = this.onServerUserJoin.bind(this);
 		this.client.on_user_disconnected = this.onServerUserLeft.bind(this);
@@ -269,7 +269,14 @@ var Casada =
 
 	changeRoom: function(room_name)
 	{
-		// Set new connection
+		// Remove current chats and conversations
+		this.chats.replaceChildren();
+		this.conversations.replaceChildren();
+
+		// Close current connection with the server
+		this.client.close();
+
+		// Set new connection with the server
 		this.setServerConnection(this.server_address, room_name);
 	},
 
@@ -741,10 +748,13 @@ var Casada =
 		this.current_room.name = this.menu_room.value;
 
 		// Reset setup
-		this.resetSetup();
+		this.resetSetup.bind(this)();
+
+		// Change room
+		this.changeRoom.bind(this)();
 
 		// Close menu
-		this.closeMenu();
+		this.closeMenu.bind(this)();
 	},
 
 	closeMenu:function()
