@@ -347,6 +347,7 @@ background-color: var(--light3-dark-color);
 {
     width: auto;
     height: auto;
+    margin-bottom: 15px;
 }
 
 .group .conversation .fix
@@ -529,7 +530,7 @@ background-color: var(--light3-dark-color);
     position: absolute;
     height: -webkit-fill-available;
     width: -webkit-fill-available;
-    z-index: 2;
+    z-index: 0;
 }
 
 #menu
@@ -711,7 +712,11 @@ background-color: var(--light3-dark-color);
 }
 
 /* TEMPLATES */
-#private-message-template, #new-group-message-template, #concurrent-group-message-template, #chat-template, #conversation-template
+#status-message-template,
+#private-message-template,
+#user-new-group-message-template, #user-concurrent-group-message-template, 
+#people-new-group-message-template, #people-concurrent-group-message-template, 
+#chat-template, #conversation-template
 {
     display:none;
 }

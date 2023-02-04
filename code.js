@@ -39,8 +39,9 @@ var Casada =
 	server_address : "wss://ecv-etic.upf.edu/node/9000/ws",
 	clients: [],
 
-	//User
-	user : 
+	//Users
+	users : [],
+	my_user : 
 	{
 		avatar : document.get("#user-avatar"),
 		nick : document.get("#username"),
@@ -57,28 +58,31 @@ var Casada =
 	chats : [],
 	current_chat_index : 0,
 
-	// Conversation logs
-	conversations : [],
-	current_conversation_index: 0,
+	// Conversation log
+	conversation_log : [],
 
 	// Scroll
 	conversation_scrolls : {},
 
 	// Message constructor
-	Message: function(type, avatar, username, content)
+	Message: function(type, avatar, user, content, time)
 	{
 		this.type = type;
 		this.avatar = avatar;
-		this.username = username;
+		this.user = user;
 		this.content = content;
+		this.time = time;
 	},
 
 	// Templates
 	chat_template : document.get("#chat-template"),
 	conversation_template: document.get("#conversation-template"),
+	status_message_template: document.get("#status-message-template"),
 	private_message_template : document.get("#private-message-template"),
-	new_group_message_template: document.get("#new-group-message-template"),
-	concurrent_group_message_template: document.get("#concurrent-group-message-template"),
+	user_new_group_message_template: document.get("#user-new-group-message-template"),
+	user_concurrent_group_message_template: document.get("#user-concurrent-group-message-template"),
+	people_new_group_message_template: document.get("#people-new-group-message-template"),
+	people_concurrent_group_message_template: document.get("#people-concurrent-group-message-template"),
 
 	// Debugging vars
 	comodin : null,
@@ -206,7 +210,7 @@ var Casada =
 	onServerReady: function(id)
 	{
 		// Assign user ID
-		Casada.user.ids[this.room.name] = id;
+		Casada.my_user.ids[this.room.name] = id;
 		console.log(`Your id is ${id}`);
 	},
 
@@ -257,16 +261,16 @@ var Casada =
 		switch(message.type)
 		{
 			case "text":
-				Casada.showGroupMessage(message);
+				Casada.showGroupMessage.bind(Casada)(this.room.name, message);
 				break;
 			case "typing":
 				console.log("typing");
 				break;
 			case "private":
-				Casada.showPrivateMessage(message);
+				Casada.showPrivateMessage.bind(Casada)(message);
 				break;
 			case "history":
-				Casada.loadLog(message);
+				Casada.loadLog.bind(Casada)(message);
 				break;
 			case "profile":
 				console.log("profile");
@@ -274,19 +278,121 @@ var Casada =
 		}		
 	},
 
-	showGroupMessage: function(message)
+	showGroupMessage: function(room_name, message)
 	{
+		// Fetch conversation
+		const conversation = this.HTML_conversations.get(`#conversation-${room_name}`);
 
+		// Fetch last conversation child
+		const last_child = conversation.get(".conversation").lastElementChild;
+
+		// Get layout type
+		let layout_type;
+		switch(true)
+		{
+			case last_child == null:
+				layout_type = "new";
+				break;
+			case last_child.classList.contains("people-message-layout"):
+				layout_type = "concurrent";
+				break;
+			default:
+				layout_type = "new";
+				break;
+		}
+
+		// Fetch proper message template
+		const message_template = layout_type == "new" ? this.people_new_group_message_template : this.people_concurrent_group_message_template;
+
+		// Clone template
+		var message_box = message_template.cloneNode(true);
+
+		// Set avatar
+		if (layout_type == "new")
+		{
+			// TODO: Set user avatar
+			message_box.get(".avatar").src = "images/default_avatar.jpg";	
+		}	
+
+		// Set username
+		if (layout_type == "new")
+		{
+			//TODO: Set username
+			const sender_id = message.user;
+			message_box.get(".username").innerText = "Francisco";
+		}
+
+		// Set inner elements template values
+		message_box.get(".message-content").innerText = message.content;
+		message_box.get(".message-time").innerText = message.time;
+
+		// Add template to the DOM
+		layout_type == "new" ? conversation.get(".conversation").appendChild(message_box) : last_child.appendChild(message_box);
+
+		//Delete template old attributes
+		message_box.removeAttribute('id');
+
+		// Show received message
+		message_box.show();
+
+		//Update scrollbar focus if user is on the current chat
+		if (this.chats[this.current_chat_index].id == `#chat-${room_name}`)
+			message_box.scrollIntoView();
+
+		// Store received message in the DB
+		this.conversation_log.find(conversation => conversation.id == room_name).messages.push(JSON.stringify(message));
 	},
 
 	showPrivateMessage: function(message)
 	{
+		// Fetch conversation
+		const conversation = this.HTML_conversations.get(`#conversation-${message.user}`);
 
+		// Clone private message template
+		var message_box = this.private_message_template.cloneNode(true);	
+
+		// Set inner elements template values
+		message_box.get(".message-content").innerText = message.content;
+		message_box.get(".message-time").innerText = message.time;
+
+		// Add template to the DOM
+		conversation.get(".conversation").appendChild(message_box);		
+
+		//Delete template old attributes and set class
+		message_box.removeAttribute('id');
+		message_box.className = "people-message";
+
+		// Show new message
+		message_box.show();
+
+		//Update scrollbar focus if user is on the current conversation
+		if (this.chats[this.current_chat_index].id == `#chat-${message.user}`)
+			message_box.scrollIntoView();
 	},
 
-	showSystemMessage: function(message)
+	showSystemMessage: function(conversation_id, message)
 	{
+		// Fetch conversation
+		const conversation = this.HTML_conversations.get(`#conversation-${conversation_id}`);
 
+		// Clone status message template
+		var message_box = this.status_message_template.cloneNode(true);	
+
+		// Set message content
+		message_box.get(".message").innerText = message;
+
+		// Add template to the DOM
+		conversation.get(".conversation").appendChild(message_box);		
+
+		//Delete template old attributes
+		message_box.removeAttribute('id');
+
+		// Show new message
+		message_box.show();
+
+		//Update scrollbar focus if user is on the current conversation
+		if (this.chats[this.current_chat_index].id == `#chat-${room_name}`)
+			message_box.scrollIntoView();
 
 	},
 
@@ -398,7 +504,7 @@ var Casada =
 		// Create private chats and conversations
 		for(const client_id of client_info)
 		{
-			if(client_id != Casada.user.ids[this.room.name])
+			if(client_id != Casada.my_user.ids[this.room.name])
 				Casada.createPrivateContent.bind(this)(client_id);
 		}
 
@@ -457,7 +563,7 @@ var Casada =
 			id: this.room.name,
 			messages: [],
 		}
-		Casada.conversations.push(room_conversation);
+		Casada.conversation_log.push(room_conversation);
 		
 	},
 
@@ -498,7 +604,7 @@ var Casada =
 		{
 			room : this.room.name,
 			id : client_id,
-			type : "group",
+			type : "private",
 			clients : [client_id],
 		}
 		Casada.chats.push(private_chat);
@@ -581,11 +687,8 @@ var Casada =
 		// Fetch current conversation
 		const current_conversation = this.HTML_conversations.get(".current");
 
-		// Fetch private message template
-		const message_template = this.private_message_template;
-
-		// Clone template
-		var message_box = message_template.cloneNode(true);	
+		// Clone private message template
+		var message_box = this.private_message_template.cloneNode(true);	
 
 		// Set input box text value to the template
 		message_box.get(".message-content").innerText = this.input.value;
@@ -597,12 +700,12 @@ var Casada =
 		// Add template to the DOM
 		current_conversation.get(".conversation").appendChild(message_box);		
 
-		//Delete template old attributes
-		message_box.removeAttribute('style');
+		//Delete template old attributes and set class
 		message_box.removeAttribute('id');
+		message_box.className = "user-message";
 
 		// Show new message
-		message_box.style.display = ''
+		message_box.show();
 
 		//Update scrollbar focus
 		message_box.scrollIntoView();
@@ -611,10 +714,11 @@ var Casada =
 		const current_chat = this.chats[this.current_chat_index];
 
 		// Build message
-		const message = new this.Message("private", null, this.user.ids[current_chat.room], this.input.value);
+		const message = new this.Message("private", null, this.my_user.ids[current_chat.room], this.input.value, date.getTime());
+		const string_message = JSON.stringify(message);
 
 		// Send private message to the user
-		this.clients.find(client => client.room.name == current_chat.room).sendMessage( JSON.stringify(message), current_chat.clients);
+		this.clients.find(client => client.room.name == current_chat.room).sendMessage(string_message, current_chat.clients);
 	},
 
 	sendPublicMessage: function()
@@ -625,26 +729,29 @@ var Casada =
 		// Fetch last conversation child
 		const last_child = current_conversation.get(".conversation").lastElementChild;
 
-		// Fetch proper template
-		let message_template;
+		// Get layout type
+		let layout_type;
 		switch(true)
 		{
 			case last_child == null:
-				message_template = this.new_group_message_template;
+				layout_type = "new";
 				break;
 			case last_child.classList.contains("user-message-layout"):
-				message_template = this.concurrent_group_message_template;
+				layout_type = "concurrent";
 				break;
 			default:
-				message_template = this.new_group_message_template;
+				layout_type = "new";
 				break;
 		}
+
+		// Fetch proper message template
+		const message_template = layout_type == "new" ? this.user_new_group_message_template : this.user_concurrent_group_message_template;
 
 		// Clone template
 		var message_box = message_template.cloneNode(true);
 
 		// Set avatar
-		if ((last_child == null) || last_child.classList.contains("people-message-layout") ) message_box.get(".avatar").src = this.user.avatar.src;		
+		if (layout_type == "new") message_box.get(".avatar").src = this.my_user.avatar.src;		
 
 		// Set input box text value to the template
 		message_box.get(".message-content").innerText = this.input.value;
@@ -654,25 +761,13 @@ var Casada =
 		message_box.get(".message-time").innerText = date.getTime();
 
 		// Add template to the DOM
-		switch(true)
-		{
-			case last_child == null:
-				current_conversation.get(".conversation").appendChild(message_box);
-				break;
-			case last_child.classList.contains("user-message-layout"):
-				last_child.appendChild(message_box);
-				break;
-			default:
-				current_conversation.get(".conversation").appendChild(message_box);
-				break;
-		}
+		layout_type == "new" ? current_conversation.get(".conversation").appendChild(message_box) : last_child.appendChild(message_box);
 
 		//Delete template old attributes
-		message_box.removeAttribute('style');
 		message_box.removeAttribute('id');
 
 		// Show new message
-		message_box.style.display = ''
+		message_box.show();
 
 		//Update scrollbar focus
 		message_box.scrollIntoView();
@@ -681,11 +776,11 @@ var Casada =
 		const current_chat = this.chats[this.current_chat_index];
 
 		// Build message
-		const message = new this.Message("text", null, this.user.ids[current_chat.room], this.input.value);
+		const message = new this.Message("text", null, this.my_user.ids[current_chat.room], this.input.value, date.getTime());
 		const string_message = JSON.stringify(message);
 
 		// Store message in the DB
-		this.conversations[this.current_conversation_index].messages.push(string_message);
+		this.conversation_log.find(conversation => conversation.id == current_chat.room).messages.push(string_message);
 
 		// Send public message to the room
 		this.clients.find(client => client.room.name == current_chat.room).sendMessage(string_message);
@@ -777,9 +872,6 @@ var Casada =
 
 				// Update current chat index
 				this.current_chat_index = this.chats.findIndex(chat => chat.id == element.id.substring(5));
-
-				// Update current conversation index
-				this.current_conversation_index = this.conversations.findIndex(conversation => conversation.id == element.id.substring(5));
 
 				//End execution
 				break;
@@ -900,8 +992,8 @@ var Casada =
 		if(this.menu_nick.value == "" || this.menu_room.value == "") return;
 
 		// Save changes
-		this.user.avatar.src = this.menu_avatar.src;
-		this.user.nick.innerText = this.menu_nick.value;
+		this.my_user.avatar.src = this.menu_avatar.src;
+		this.my_user.nick.innerText = this.menu_nick.value;
 
 		// New room
 		const new_room = this.menu_room.value;
