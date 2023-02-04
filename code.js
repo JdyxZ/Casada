@@ -55,13 +55,14 @@ var Casada =
 
 	// Chats
 	chats : [],
-	current_chat : {},
+	current_chat_index : 0,
 
 	// Scroll
 	conversation_scrolls : {},
 
 	// Conversation logs
-	conversation_logs : {},
+	conversations : [],
+	current_conversation_index: 0,
 
 	// Templates
 	chat_template : document.get("#chat-template"),
@@ -152,16 +153,16 @@ var Casada =
 		this.setServerConnection.bind(client)(this.server_address, room);
 
 		// Server callbacks
-		client.on_connect = this.onServerConnection.bind(client);
-		client.on_ready = this.onServerReady.bind(client);
-		client.on_user_connected = this.onServerUserJoin.bind(client);
-		client.on_user_disconnected = this.onServerUserLeft.bind(client);
-		client.on_message = this.onServerMessageReceived.bind(client);
+		client.on_connect = this.onServerConnection;
+		client.on_ready = this.onServerReady;
+		client.on_user_connected = this.onServerUserJoin;
+		client.on_user_disconnected = this.onServerUserLeft;
+		client.on_message = this.onServerMessageReceived;
 
 		// Additional callbacks
-		//client.client.on_error = this.onServerFail.bind(client);connected_rooms
-		//client.client.on_close = this.onServerClose.bind(client);
-		//client.client.on_room_info = this.onServerRoomInfo.bind(client);
+		//client.client.on_error = this.onServerFail;connected_rooms
+		//client.client.on_close = this.onServerClose;
+		//client.client.on_room_info = this.onServerRoomInfo;
 	},
 
 	setServerConnection: function(server_address, room_name)
@@ -173,6 +174,8 @@ var Casada =
 	{
 		// Inform the user the connection has been successfully established
 		console.log(`Connection with the server in room ${this.room.name} successfully established`);
+
+		console.log(this.clients);
 
 		// Append new room to the list of connected rooms
 		const new_room =
@@ -282,7 +285,7 @@ var Casada =
 		});
 	},
 
-	setRoomClients: function(client)
+	setRoomClients: async function(client)
 	{
 		// Fetch clients info
 		let room_info = await Casada.serverGetRoomInfo.bind(client)(client.room.name);
@@ -291,7 +294,7 @@ var Casada =
 		this.connected_rooms.find(room => room.name == client.room.name).clients = room_info.clients;
 	},
 
-	updateRoomClients : function(client)
+	updateRoomClients : async function(client)
 	{
 		// Fetch clients info
 		let room_info = await Casada.serverGetRoomInfo.bind(client)(client.room.name);
@@ -305,8 +308,8 @@ var Casada =
 
 	getRoomClients : function (client)
 	{
-		return this.connected_rooms.find(room => room.name == client.room.name).clients
-	}
+		return this.connected_rooms.find(room => room.name == client.room.name).clients;
+	},
 
 	serverLoadAvailableRooms: async function()
 	{
@@ -411,6 +414,14 @@ var Casada =
 			clients : clients_info,
 		}
 		Casada.chats.push(room_chat);
+
+		// Append new conversation to the log
+		const room_conversation =
+		{
+			id: this.room.name,
+			messages: [],
+		}
+		Casada.conversations.push(room_conversation);
 		
 	},
 
@@ -517,10 +528,10 @@ var Casada =
 		// Send private or public message
 		switch(true)
 		{
-			case this.current_chat.type == "private":
+			case this.chats[this.current_chat_index].type == "private":
 				this.sendPrivateMessage.bind(this)();
 				break;
-			case this.current_chat.type == "group":
+			case this.chats[this.current_chat_index].type == "group":
 				this.sendPublicMessage.bind(this)();
 				break;
 		}
@@ -561,7 +572,7 @@ var Casada =
 		message_box.scrollIntoView();
 
 		// Send private message to the user
-		this.clients.find(client => client.room.name == this.current_chat.room).sendMessage(this.input.value, this.current_chat.clients);
+		this.clients.find(client => client.room.name == this.chats[this.current_chat_index].room).sendMessage(this.input.value, this.chats[this.current_chat_index].clients);
 	},
 
 	sendPublicMessage: function()
@@ -625,7 +636,7 @@ var Casada =
 		message_box.scrollIntoView();
 
 		// Send public message to the room
-		this.clients.find(client => client.room.name == this.current_chat.room).sendMessage(this.input.value);
+		this.clients.find(client => client.room.name == this.chats[this.current_chat_index].room).sendMessage(this.input.value);
 	},
 
 	filterChats:function()
@@ -712,8 +723,11 @@ var Casada =
 				// Set clicked conversation scroll
 				new_conversation.parentElement.scroll(0, this.conversation_scrolls[element.id.replace("chat", "conversation")]);
 
-				// Change current chat index
-				this.current_chat = this.chats.find(chat => chat.id === element.id.substring(5));
+				// Update current chat index
+				this.current_chat_index = this.chats.findIndex(chat => chat.id == element.id.substring(5));
+
+				// Update current conversation index
+				this.current_conversation_index = this.conversations.findIndex(conversation => conversation.id == element.id.substring(5));
 
 				//End execution
 				break;
