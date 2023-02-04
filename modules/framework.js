@@ -118,3 +118,11 @@ HTMLElement.prototype.hide = function()
 {
 	this.style.display = "none";
 };
+
+Array.prototype.remove = function(element)
+{
+	return this.filter( (value) =>
+	{
+		return value != element;
+	});
+}

@@ -510,6 +510,7 @@ background-color: var(--light3-dark-color);
     display: inherit;
     color: white;
     background-color: var(--light2-dark-color);
+    border: none;
     border-radius: 5px;
     height: 35px;
     width: -webkit-fill-available;

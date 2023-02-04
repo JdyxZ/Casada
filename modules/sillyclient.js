@@ -153,13 +153,17 @@ SillyClient.arrayToString = function(array)
 //Close the connection with the server
 SillyClient.prototype.close = function()
 {
-	if(!this.socket)
-		return;
+	return new Promise((resolve, fail) => {
+		if(!this.socket)
+			fail();
 
-	this.socket.close();
-	this.socket = null;
-	this.clients = {};
-	this.is_connected = false;
+
+		this.socket.close();
+		this.socket = null;
+		this.clients = {};
+		this.is_connected = false;
+		resolve();
+	});
 }
 
 //Process events 

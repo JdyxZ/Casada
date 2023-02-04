@@ -50,7 +50,7 @@ var Casada =
 	// Rooms
 	default_room : "Casada",
 	room_list_index : 0,
-	available_rooms : [],
+	available_rooms : {},
 
 	current_room :
 	{
@@ -136,13 +136,15 @@ var Casada =
 
 		// Server callbacks
 		this.client.on_connect = this.onServerConnection.bind(this);
-		this.client.on_error = this.onServerFail.bind(this);
-		this.client.on_close = this.onServerClose(this);
 		this.client.on_ready = this.onServerReady.bind(this);
 		this.client.on_user_connected = this.onServerUserJoin.bind(this);
 		this.client.on_user_disconnected = this.onServerUserLeft.bind(this);
-		//this.client.on_room_info = this.onServerRoomInfo.bind(this);
 		this.client.on_message = this.onServerMessageReceived.bind(this);
+
+		// Additional callbacks
+		//this.client.on_error = this.onServerFail.bind(this);
+		//this.client.on_close = this.onServerClose(this);
+		//this.client.on_room_info = this.onServerRoomInfo.bind(this);
 	},
 
 	setServerConnection: function(server_address, room_name)
@@ -152,11 +154,11 @@ var Casada =
 
 	onServerConnection: function()
 	{
-		// Inform the user the connection has been successfully established
-		console.log(`Connection with the server in room ${this.current_room.name} successfully established`);
-
 		// Set new current room
 		this.current_room.name = this.client.room.name;
+
+		// Inform the user the connection has been successfully established
+		console.log(`Connection with the server in room ${this.current_room.name} successfully established`);
 
 		// Load rooms
 		this.loadRooms.bind(this)();
@@ -223,6 +225,9 @@ var Casada =
 					"Una sala de fitness peculiar...": "unknown", 
 					"La guarida de la rata": "unknown", 
 					"1234": "unknown"};
+
+				// Delete current room from the list of available rooms
+				delete this.available_rooms[this.current_room.name];
 				
 				// Resolve promise
 				resolve();
@@ -258,26 +263,37 @@ var Casada =
 		// Get number of available rooms
 		const room_list_length = Object.keys(this.available_rooms).length
 
-		// Range new room index
-		new_room = new_room < 0 ? room_list_length - 1 : (new_room > room_list_length - 1 ? 0 : new_room);
+		// No rooms available
+		if(room_list_length == 0)
+		{
+			this.menu_room.value = "";
+			this.room_people.innerText = "0";
+		}
+		// Rooms available
+		else
+		{
+			// Range new room index
+			new_room = new_room < 0 ? room_list_length - 1 : (new_room > room_list_length - 1 ? 0 : new_room);
 
-		// Set new room
-		this.room_list_index = new_room;
-		this.menu_room.value = Object.keys(this.available_rooms)[this.room_list_index];
-		this.room_people.innerText = Object.values(this.available_rooms)[this.room_list_index];
+			// Set new room
+			this.room_list_index = new_room;
+			this.menu_room.value = Object.keys(this.available_rooms)[this.room_list_index];
+			this.room_people.innerText = Object.values(this.available_rooms)[this.room_list_index];
+		}
 	},
 
-	changeRoom: function(room_name)
+	changeRoom: async function(room_name)
 	{
 		// Remove current chats and conversations
 		this.chats.replaceChildren();
-		this.conversations.replaceChildren();
+		this.conversations.replaceChildren(this.conversations.get(".fix"));
 
 		// Close current connection with the server
-		this.client.close();
+		await this.client.close();
 
 		// Set new connection with the server
 		this.setServerConnection(this.server_address, room_name);
+		
 	},
 
 	createContent: async function()
@@ -745,13 +761,15 @@ var Casada =
 		// Save changes
 		this.user.avatar.src = this.menu_avatar.src;
 		this.user.nick.innerText = this.menu_nick.value;
-		this.current_room.name = this.menu_room.value;
+
+		// New room
+		const new_room = this.menu_room.value;
 
 		// Reset setup
 		this.resetSetup.bind(this)();
 
 		// Change room
-		this.changeRoom.bind(this)();
+		this.changeRoom.bind(this)(new_room);
 
 		// Close menu
 		this.closeMenu.bind(this)();

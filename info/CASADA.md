@@ -23,12 +23,14 @@
 - Keep focus on input when we exit the emoji menu.✅
 - Select chat: Keep scroll or scroll down.✅
 - Positionate well the emoji menu. ✅
-- Check where to place || operator to place default values for values that evaluate to false.
+- Check where to place || operator to place default values for values that evaluate to false. ✅
 - SillyServer.
-    - Load rooms.
+    - Load rooms.✅
     - Room change. ✅
     - Send and receive messages.
-    - Status messages.
+    - Conversation status messages.
+    - Conversation status.
+    - Last sent message.
     - Send log.
 - Sort chats based on the most recent message (with animation?).
 - Unread message status.
@@ -38,6 +40,7 @@
 - Conversation messages search bar.
 - Avatar selector.
 - When click out of the scope of room menu, exit menu.
+- Change messages CSS.
 
 ## Notas
 white color : eaeaea
