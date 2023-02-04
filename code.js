@@ -57,12 +57,21 @@ var Casada =
 	chats : [],
 	current_chat_index : 0,
 
-	// Scroll
-	conversation_scrolls : {},
-
 	// Conversation logs
 	conversations : [],
 	current_conversation_index: 0,
+
+	// Scroll
+	conversation_scrolls : {},
+
+	// Message constructor
+	Message: function(type, avatar, username, content)
+	{
+		this.type = type;
+		this.avatar = avatar;
+		this.username = username;
+		this.content = content;
+	},
 
 	// Templates
 	chat_template : document.get("#chat-template"),
@@ -161,11 +170,11 @@ var Casada =
 		client.on_user_connected = this.onServerUserJoin;
 		client.on_user_disconnected = this.onServerUserLeft;
 		client.on_message = this.onServerMessageReceived;
+		client.on_room_info = this.onServerRoomInfo;
 
 		// Additional callbacks
-		//client.client.on_error = this.onServerFail;connected_rooms
-		//client.client.on_close = this.onServerClose;
-		//client.client.on_room_info = this.onServerRoomInfo;
+		//client.on_error = this.onServerFail;connected_rooms
+		//client.on_close = this.onServerClose;
 	},
 
 	setServerConnection: function(server_address, room_name)
@@ -177,24 +186,6 @@ var Casada =
 	{
 		// Inform the user the connection has been successfully established
 		console.log(`Connection with the server in room ${this.room.name} successfully established`);
-
-		// Wait until we have some info about the clients
-		Casada.serverGetRoomInfo.bind(this)(this.room.name).then( client_info => {
-
-			// Append new room to the list of connected rooms
-			const new_room =
-			{
-				name : this.room.name,
-				clients : client_info.clients,
-			};
-			Casada.connected_rooms.push(new_room);
-
-			// Load rooms
-			Casada.serverLoadAvailableRooms.bind(this)();
-
-			// Create chats
-			Casada.createContent.bind(this)(client_info.clients);
-		})
 	},
 
 	onServerFail: function()
@@ -226,6 +217,9 @@ var Casada =
 
 		// Create a new private chat and conversation
 		Casada.createPrivateContent.bind(this)(client_id);	
+
+		// Update clients lists
+		Casada.updateRoomClients(this);
 	},
 
 	onServerUserLeft: function(client_id)
@@ -239,12 +233,66 @@ var Casada =
 
 	onServerRoomInfo: function(room_info)
 	{
-		console.log(room_info);
+		// Append new room to the list of connected rooms
+		const new_room =
+		{
+			name : this.room.name,
+			clients : room_info.clients,
+		};
+		Casada.connected_rooms.push(new_room);
+
+		// Load rooms
+		Casada.serverLoadAvailableRooms.bind(this)();
+
+		// Create chats
+		Casada.createContent.bind(this)(room_info.clients);
 	},
 
-	onServerMessageReceived: function(user_id, message)
+	onServerMessageReceived: function(user_id, message_string)
 	{
-		console.log(`The user with id ${user_id} has send the following message \n ${message}`);
+		// Convert message string into an object
+		const message = JSON.parse(message_string);
+
+		// Detect message type
+		switch(message.type)
+		{
+			case "text":
+				Casada.showGroupMessage(message);
+				break;
+			case "typing":
+				console.log("typing");
+				break;
+			case "private":
+				Casada.showPrivateMessage(message);
+				break;
+			case "history":
+				Casada.loadLog(message);
+				break;
+			case "profile":
+				console.log("profile");
+				break;
+		}		
+	},
+
+	showGroupMessage: function(message)
+	{
+
+	},
+
+	showPrivateMessage: function(message)
+	{
+
+	},
+
+	showSystemMessage: function(message)
+	{
+
+
+	},
+
+	loadLog: function(message)
+	{
+
 	},
 
 	serverUpdateRoomList: function()
@@ -374,13 +422,16 @@ var Casada =
 		chat_username.innerText = this.room.name;
 		chat_last_message.innerText = "Last sent message";
 
+		// First chat
+		const first_chat = Casada.connected_rooms.length == 1 ? true : false;
+
 		// Set chat id and class
 		new_chat.id = `chat-${this.room.name}`;
-		new_chat.className = "chat";
+		new_chat.className = first_chat ? "current" : "chat";
 
 		// Set conversation id and class
 		new_conversation.id = `conversation-${this.room.name}`;
-		new_conversation.className = "not-current group";
+		new_conversation.className = first_chat ? "current group" : "not-current group";
 
 		// Append new chat and conversation to the doom
 		Casada.HTML_chats.appendChild(new_chat);
@@ -556,8 +607,14 @@ var Casada =
 		//Update scrollbar focus
 		message_box.scrollIntoView();
 
+		// Get current chat
+		const current_chat = this.chats[this.current_chat_index];
+
+		// Build message
+		const message = new this.Message("private", null, this.user.ids[current_chat.room], this.input.value);
+
 		// Send private message to the user
-		this.clients.find(client => client.room.name == this.chats[this.current_chat_index].room).sendMessage(this.input.value, this.chats[this.current_chat_index].clients);
+		this.clients.find(client => client.room.name == current_chat.room).sendMessage( JSON.stringify(message), current_chat.clients);
 	},
 
 	sendPublicMessage: function()
@@ -620,8 +677,18 @@ var Casada =
 		//Update scrollbar focus
 		message_box.scrollIntoView();
 
+		// Get current chat
+		const current_chat = this.chats[this.current_chat_index];
+
+		// Build message
+		const message = new this.Message("text", null, this.user.ids[current_chat.room], this.input.value);
+		const string_message = JSON.stringify(message);
+
+		// Store message in the DB
+		this.conversations[this.current_conversation_index].messages.push(string_message);
+
 		// Send public message to the room
-		this.clients.find(client => client.room.name == this.chats[this.current_chat_index].room).sendMessage(this.input.value);
+		this.clients.find(client => client.room.name == current_chat.room).sendMessage(string_message);
 	},
 
 	filterChats:function()
