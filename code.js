@@ -71,6 +71,9 @@ var Casada =
 	new_group_message_template: document.get("#new-group-message-template"),
 	concurrent_group_message_template: document.get("#concurrent-group-message-template"),
 
+	// Debugging vars
+	comodin : null,
+
 	init: function()
 	{
 		// CSS variables
@@ -170,29 +173,28 @@ var Casada =
 		this.connect(server_address, room_name);
 	},
 
-	onServerConnection: async function()
+	onServerConnection: function()
 	{
 		// Inform the user the connection has been successfully established
 		console.log(`Connection with the server in room ${this.room.name} successfully established`);
 
-		console.log(this.clients);
+		// Wait until we have some info about the clients
+		Casada.serverGetRoomInfo.bind(this)(this.room.name).then( client_info => {
 
-		// Append new room to the list of connected rooms
-		const new_room =
-		{
-			name : this.room.name,
-			clients : "",
-		};
-		Casada.connected_rooms.push(new_room);
+			// Append new room to the list of connected rooms
+			const new_room =
+			{
+				name : this.room.name,
+				clients : client_info.clients,
+			};
+			Casada.connected_rooms.push(new_room);
 
-		// Set new room client list
-		Casada.setRoomClients(this);
+			// Load rooms
+			Casada.serverLoadAvailableRooms.bind(this)();
 
-		// Load rooms
-		Casada.serverLoadAvailableRooms.bind(this)();
-
-		// Create chats
-		Casada.createContent.bind(this)();
+			// Create chats
+			Casada.createContent.bind(this)(client_info.clients);
+		})
 	},
 
 	onServerFail: function()
@@ -245,7 +247,7 @@ var Casada =
 		console.log(`The user with id ${user_id} has send the following message \n ${message}`);
 	},
 
-	serverGetRoomList: function()
+	serverUpdateRoomList: function()
 	{
 		return new Promise( (resolve,fail) => 
 		{
@@ -260,7 +262,7 @@ var Casada =
 					"1234": "unknown"};
 
 				// Delete connected rooms from the list of available rooms
-				Casada.connected_rooms.map(room => room.name).forEach( (room_name) =>
+				Casada.connected_rooms.map(room => room.name).forEach( room_name =>
 				{
 					delete Casada.available_rooms[room_name];
 				});
@@ -285,15 +287,6 @@ var Casada =
 		});
 	},
 
-	setRoomClients: async function(client)
-	{
-		// Fetch clients info
-		let room_info = await Casada.serverGetRoomInfo.bind(client)(client.room.name);
-
-		// Set client room clients property
-		this.connected_rooms.find(room => room.name == client.room.name).clients = room_info.clients;
-	},
-
 	updateRoomClients : async function(client)
 	{
 		// Fetch clients info
@@ -306,15 +299,10 @@ var Casada =
 		this.chats.find(chat => chat.room == client.room.name).clients = room_info.clients;
 	},
 
-	getRoomClients : function (client)
-	{
-		return this.connected_rooms.find(room => room.name == client.room.name).clients;
-	},
-
 	serverLoadAvailableRooms: async function()
 	{
 		// Fetch room list
-		await Casada.serverGetRoomList.bind(this)();
+		await Casada.serverUpdateRoomList.bind(this)();
 
 		// Show first room
 		Casada.showRoom(0);
@@ -354,16 +342,13 @@ var Casada =
 		
 	},
 
-	createContent: async function()
+	createContent: function(client_info)
 	{
-		// Get clients info
-		let clients_info = Casada.getRoomClients(this);
-
 		// Create room group chat and conversation
-		Casada.createRoomContent.bind(this)(clients_info);
+		Casada.createRoomContent.bind(this)(client_info);
 
 		// Create private chats and conversations
-		for(const client_id of clients_info)
+		for(const client_id of client_info)
 		{
 			if(client_id != Casada.user.ids[this.room.name])
 				Casada.createPrivateContent.bind(this)(client_id);
@@ -373,7 +358,7 @@ var Casada =
 		Casada.initScrolls.bind(Casada)();
 	},
 
-	createRoomContent: function(clients_info)
+	createRoomContent: function(client_info)
 	{
 		// Clone templates
 		let new_chat = Casada.chat_template.cloneNode(true);
@@ -411,7 +396,7 @@ var Casada =
 			room : this.room.name,
 			id : this.room.name,
 			type : "group",
-			clients : clients_info,
+			clients : client_info,
 		}
 		Casada.chats.push(room_chat);
 
@@ -686,7 +671,7 @@ var Casada =
 		this.chat_search_bar.value = "";
 		this.chat_eraser.classList.replace("eraser-showing", "eraser-hidden");
 		this.search_bar_box.style.marginBottom = "10px";
-		document.getAll("#chats > div").forEach( (element) => { 
+		document.getAll("#chats > div").forEach( element => { 
 			element.show(); 
 		});
 	},
