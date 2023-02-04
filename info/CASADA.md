@@ -28,6 +28,9 @@
     - Load rooms.✅
     - Room change. ✅
     - Send and receive messages.
+    - Show and receive user info on connect.
+    - Define an enum for the message type.
+    - Create a global variable to control current chat info.
     - Conversation status messages.
     - Conversation status.
     - Last sent message.
@@ -41,6 +44,8 @@
 - Avatar selector.
 - When click out of the scope of room menu, exit menu.
 - Change messages CSS.
+- Last details: Choose room, avatar, nick on enter; etc.
+- Several client instances.
 
 ## Notas
 white color : eaeaea

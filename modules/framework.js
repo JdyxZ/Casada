@@ -126,3 +126,17 @@ Array.prototype.remove = function(element)
 		return value != element;
 	});
 }
+
+String.prototype.reverseString = function() 
+{
+
+	// Declare some vars
+	var length = this.length;
+	reversed_string = [];
+	index = 0;
+
+	for (var i = length - 1; i >= 0; i--) {
+		reversed_string[index++] = this.charAt(i);
+	}
+	return reversed_string.join("");
+ }

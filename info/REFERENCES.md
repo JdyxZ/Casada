@@ -27,6 +27,7 @@ https://stackoverflow.com/questions/15118540/css-text-align-justify-big-spaces
 https://stackoverflow.com/questions/17642872/refresh-page-and-keep-scroll-position 
 https://stackoverflow.com/questions/17642872/refresh-page-and-keep-scroll-position
 https://stackoverflow.com/questions/44846614/trigger-css-animations-in-javascript
+https://www.tutorialrepublic.com/faq/how-to-find-an-object-by-property-value-in-an-array-of-javascript-objects.php#:~:text=Answer%3A%20Use%20the%20find(),testing%20function%2C%20undefined%20is%20returned.
 
 
 
