@@ -1,6 +1,5 @@
-
 /***************** NAMESPACE *****************/
-
+import {fs} from 'fs';
 var Casada =
 {
 	// Root
@@ -40,7 +39,7 @@ var Casada =
 	clients: [],
 
 	//Users
-	users : [],
+	users : {},
 	my_user : 
 	{
 		avatar : document.get("#user-avatar"),
@@ -65,10 +64,9 @@ var Casada =
 	conversation_scrolls : {},
 
 	// Message constructor
-	Message: function(type, avatar, user, content, time)
+	Message: function(type, user, content, time)
 	{
 		this.type = type;
-		this.avatar = avatar;
 		this.user = user;
 		this.content = content;
 		this.time = time;
@@ -94,16 +92,16 @@ var Casada =
 		document.documentElement.style.setProperty('--screen_height', this.available_height + "px");
 
 		// Event listeners
-		this.initEventsListeners.bind(this)();
+		this.initEventsListeners();
 
 		// Emoji picker
 		this.emojiPickerInit();
 
 		// Create a new SillyClient instance
-		const new_client = this.newClient.bind(this)();
+		const new_client = this.newClient();
 
 		// Init the new client
-		this.initClient.bind(this)(new_client, this.default_room);
+		this.initClient(new_client, this.default_room);
 	},
 
 	initEventsListeners: function()
@@ -177,8 +175,8 @@ var Casada =
 		client.on_room_info = this.onServerRoomInfo;
 
 		// Additional callbacks
-		//client.on_error = this.onServerFail;connected_rooms
-		//client.on_close = this.onServerClose;
+		client.on_error = this.onServerFail;
+		client.on_close = this.onServerClose;
 	},
 
 	setServerConnection: function(server_address, room_name)
@@ -190,21 +188,27 @@ var Casada =
 	{
 		// Inform the user the connection has been successfully established
 		console.log(`Connection with the server in room ${this.room.name} successfully established`);
+
+		// Send user data
+		//this.sendUserData(this);
 	},
 
 	onServerFail: function()
 	{
 		// Alert the user the connection with the server could not been established
-		alert(`The connection to the server address ${Casada.server_address} has failed`);
+		alert(`The connection to the server address ${Casada.server_address} has failed. Trying to reconnect`);
+
+		// Reconnect
+		Casada.setServerConnection(Casada.server_address, this.room.name);
 	},
 
 	onServerClose: function()
 	{
 		// Alert the user the server has been shut down
-		alert(`Warning: The server has been shut down. Trying to reconnect`);
+		alert(`Warning: The server has been shut down`);
 
-		// Reconnect
-		Casada.setServerConnection(Casada.server_address, this.room.name);
+		// Delete user data
+		//Object.values(Casada.my_user.ids).forEach(id => this.storeData(`Casada_${id}`, undefined));
 	},
 
 	onServerReady: function(id)
@@ -235,6 +239,9 @@ var Casada =
 			document.get(`#chat-${this.room.name}`).classList.remove("offline-chat");
 			room_chat.online = true;
 		}
+
+		// Send profile info
+		//Casada.sendProfileInfoReady(this);
 
 		//Update chat profile
 		Casada.updateChatProfile();
@@ -293,19 +300,19 @@ var Casada =
 		switch(message.type)
 		{
 			case "text":
-				Casada.showGroupMessage.bind(Casada)(this.room.name, message);
+				Casada.showGroupMessage(this.room.name, message);
 				break;
 			case "typing":
 				console.log("typing");
 				break;
 			case "private":
-				Casada.showPrivateMessage.bind(Casada)(message);
+				Casada.showPrivateMessage(message);
 				break;
 			case "history":
-				Casada.loadLog.bind(Casada)(message);
+				Casada.loadLog(message);
 				break;
 			case "profile":
-				console.log("profile");
+				Casada.loadUserData(this, message);
 				break;
 		}		
 	},
@@ -611,7 +618,7 @@ var Casada =
 		
 	},
 
-	createPrivateContent(client_id)
+	createPrivateContent: function(client_id)
 	{
 		// Clone templates
 		let new_chat = Casada.chat_template.cloneNode(true);
@@ -720,7 +727,7 @@ var Casada =
 		{
 			Casada.hideEmojiPicker();
 
-		}	 
+		}
 		
 	},
 
@@ -802,7 +809,7 @@ var Casada =
 		const current_chat = this.chats[this.current_chat_id];
 
 		// Build message
-		const message = new this.Message("private", null, this.my_user.ids[current_chat.room], this.input.value, date.getTime());
+		const message = new this.Message("private", this.my_user.ids[current_chat.room], this.input.value, date.getTime());
 		const string_message = JSON.stringify(message);
 
 		// Send private message to the user
@@ -864,7 +871,7 @@ var Casada =
 		const current_chat = this.chats[this.current_chat_id];
 
 		// Build message
-		const message = new this.Message("text", null, this.my_user.ids[current_chat.room], this.input.value, date.getTime());
+		const message = new this.Message("text", this.my_user.ids[current_chat.room], this.input.value, date.getTime());
 		const string_message = JSON.stringify(message);
 
 		// Store message in the DB
@@ -879,7 +886,7 @@ var Casada =
 		this.HTML_chats.get(`#chat-${chat_id} .last-message`).innerText = sender ? `${sender}: ${message}` : message;
 	},
 
-	filterChats:function()
+	filterChats: function()
 	{
 		const query = this.chat_search_bar.value;
 		const regex = new RegExp(query, "i");
@@ -921,7 +928,7 @@ var Casada =
 
 	},
 
-	eraseChatSearch:function()
+	eraseChatSearch: function()
 	{
 		this.chat_search_bar.value = "";
 		this.chat_eraser.classList.replace("eraser-showing", "eraser-hidden");
@@ -931,7 +938,7 @@ var Casada =
 		});
 	},
 
-	selectChat:function(event)
+	selectChat: function(event)
 	{
 		// Declare some vars
 		const regex = /chat-[A-Za-z]+|chat-[1-9]+/;
@@ -975,7 +982,7 @@ var Casada =
 		}
 	},
 
-	emojiPickerInit:function()
+	emojiPickerInit: function()
 	{
 		// Chat setup
 		this.emoji_picker.resizable = false;
@@ -994,7 +1001,7 @@ var Casada =
 		}
 	},
 
-	dragMenu:function(event)
+	dragMenu: function(event)
 	{
 		// Event
 		event = event || window.event;
@@ -1036,7 +1043,7 @@ var Casada =
 		}
 	},
 
-	openMenu:function()
+	openMenu: function()
 	{
 		// Load menu
 		this.menu_grid.style.zIndex = "2";
@@ -1050,7 +1057,7 @@ var Casada =
 
 	},
 
-	changeAvatar:function()
+	changeAvatar: function()
 	{
 		// File uploader and avatar image
 		file_uploader = document.get("#menu input[type='file']");
@@ -1060,17 +1067,24 @@ var Casada =
 
 		// Change user avatar
 		file_uploader.when("change", () =>{
+
+			// Size limit
+			if (file_uploader.files[0].size / 10e5 > 1)
+			{
+				alert("The image is bigger than 1MB, try with another image...");
+				return;
+			}
+
+			// Read data
 			const reader = new FileReader();
 			reader.readAsDataURL(file_uploader.files[0]);
 			reader.addEventListener("load", () => {
 				this.menu_avatar.src = reader.result;				
 			});
-		});
-
-		
+		});		
 	},
 
-	resetSetup:function()
+	resetSetup: function()
 	{
 		this.menu_avatar.src = "images/default_avatar.jpg";
 		this.menu_nick.value = "";
@@ -1078,7 +1092,7 @@ var Casada =
 		this.room_people.innerText = "0";
 	},
 
-	saveSetup:function()
+	saveSetup: function()
 	{
 		// Check all fields are not empty
 		if(this.menu_nick.value == "") this.menu_nick.style.border = "2px #912626 solid", this.menu_nick.placeholder = "Choose a nick";
@@ -1104,14 +1118,57 @@ var Casada =
 		this.closeMenu.bind(this)();
 	},
 
-	closeMenu:function()
+	closeMenu: function()
 	{
 		// Hide menu
 		this.menu_grid.style.zIndex = "0";
 		this.menu_grid.hide();
 	},
 
-	hideEmojiPicker:function(event)
+	sendUserData: function(client)
+	{
+		// Some vars
+		const user_id = this.my_user.ids[client.room.name];
+		const user_nick = this.my_user.nick.value;
+		const user_avatar = this.my_user.avatar.src;
+
+		// Create object
+		const obj = 
+		{
+			nick: user_nick,
+			avatar: user_avatar
+		}
+
+		// Store data in the db (not sure about race condition protection)
+		client.storeData(`Casada_${user_id}`, JSON.stringify(obj), () => {
+			this.sendProfileInfoReady(client);
+		});
+		
+	},
+
+	sendProfileInfoReady : function(client)
+	{
+		// Build message
+		const message = new this.Message("profile", user_id, null, null);
+		const string_message = JSON.stringify(message);
+
+		// Send message reporting username and avatar
+		client.sendMessage(string_message);
+	},
+
+	loadUserData: function(client, message)
+	{
+		// Fetch avatar
+		client.loadData(`Casada_${message.user}`, (data) => {
+			// Parse data to object
+			obj = JSON.parse(data);
+
+			// Store data in users object
+			this.users[message.user] = obj;
+		});
+	},
+
+	hideEmojiPicker: function(event)
 	{
 		let emoji_main_div = document.getElementById("emojikb-maindiv");
 
@@ -1122,3 +1179,4 @@ var Casada =
 		}
 	},
 }
+

@@ -40,6 +40,7 @@
     - Last sent message.⏺
     - Send log.
     - Several client instances.✅
+- Check binds.
 - Sort chats based on the most recent message (with animation?).
 - Avatar selector.
 - Unread message status.

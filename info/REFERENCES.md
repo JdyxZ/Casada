@@ -28,6 +28,8 @@ https://stackoverflow.com/questions/17642872/refresh-page-and-keep-scroll-positi
 https://stackoverflow.com/questions/17642872/refresh-page-and-keep-scroll-position
 https://stackoverflow.com/questions/44846614/trigger-css-animations-in-javascript
 https://www.tutorialrepublic.com/faq/how-to-find-an-object-by-property-value-in-an-array-of-javascript-objects.php#:~:text=Answer%3A%20Use%20the%20find(),testing%20function%2C%20undefined%20is%20returned.
+https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event
+https://stackoverflow.com/questions/36869615/how-to-edit-an-external-json-file-in-javascript
 
 
 
