@@ -52,14 +52,14 @@ var Casada =
 	default_room : "Casada",
 	room_list_index : 0,
 	available_rooms : {},
-	connected_rooms : [],
+	connected_rooms : {},
 
 	// Chats
-	chats : [],
-	current_chat_index : 0,
+	chats : {},
+	current_chat_id : "",
 
 	// Conversation log
-	conversation_log : [],
+	conversation_log : {},
 
 	// Scroll
 	conversation_scrolls : {},
@@ -214,7 +214,7 @@ var Casada =
 		console.log(`Your id is ${id}`);
 	},
 
-	onServerUserJoin: function(client_id)
+	onServerUserJoin: async function(client_id)
 	{
 		// Inform the user a new client has joined the room
 		console.log(`A new user with id ${client_id} has joined the room`);
@@ -223,16 +223,49 @@ var Casada =
 		Casada.createPrivateContent.bind(this)(client_id);	
 
 		// Update clients lists
-		Casada.updateRoomClients(this);
+		await Casada.updateRoomClients(this);
+
+		// Show system message
+		Casada.showSystemMessage(this.room.name, `The user ${client_id} has joined the room`);
+
+		// Change room chat status
+		const room_chat = Casada.chats[this.room.name];
+		if (!room_chat.online)
+		{
+			document.get(`#chat-${this.room.name}`).classList.remove("offline-chat");
+			room_chat.online = true;
+		}
+
+		//Update chat profile
+		Casada.updateChatProfile();
 	},
 
-	onServerUserLeft: function(client_id)
+	onServerUserLeft: async function(client_id)
 	{
 		// Inform the user a new client has left the room
 		console.log(`The user with id ${client_id} has left the room`);
 
 		// Update clients lists
-		Casada.updateRoomClients(this);
+		await Casada.updateRoomClients(this);
+
+		// Show system message
+		Casada.showSystemMessage(this.room.name, `The user ${client_id} has left the room`);
+		Casada.showSystemMessage(client_id, `The user has left the room and is no longer available`);		
+
+		// Change room chat status
+		const room_chat = Casada.chats[this.room.name];
+		if (room_chat.clients.length == 1)
+		{
+			document.get(`#chat-${this.room.name}`).classList.add("offline-chat");
+			room_chat.online = false;
+		}
+
+		// Change private chat status
+		Casada.chats[client_id].online = false;
+		document.get(`#chat-${client_id}`).classList.add("offline-chat");
+
+		//Update chat profile
+		Casada.updateChatProfile();
 	},
 
 	onServerRoomInfo: function(room_info)
@@ -240,10 +273,9 @@ var Casada =
 		// Append new room to the list of connected rooms
 		const new_room =
 		{
-			name : this.room.name,
-			clients : room_info.clients,
+			clients : room_info.clients
 		};
-		Casada.connected_rooms.push(new_room);
+		Casada.connected_rooms[this.room.name] = new_room;
 
 		// Load rooms
 		Casada.serverLoadAvailableRooms.bind(this)();
@@ -336,11 +368,14 @@ var Casada =
 		message_box.show();
 
 		//Update scrollbar focus if user is on the current chat
-		if (this.chats[this.current_chat_index].id == `#chat-${room_name}`)
+		if (this.current_chat_id == room_name)
 			message_box.scrollIntoView();
 
 		// Store received message in the DB
-		this.conversation_log.find(conversation => conversation.id == room_name).messages.push(JSON.stringify(message));
+		this.conversation_log[room_name].messages.push(JSON.stringify(message));
+
+		// Update last message
+		this.updateLastMessage(room_name, message.user, message.content);
 	},
 
 	showPrivateMessage: function(message)
@@ -366,8 +401,11 @@ var Casada =
 		message_box.show();
 
 		//Update scrollbar focus if user is on the current conversation
-		if (this.chats[this.current_chat_index].id == `#chat-${message.user}`)
+		if (this.current_chat_id == message.user)
 			message_box.scrollIntoView();
+
+		// Update last message
+		this.updateLastMessage(message.user, null, message.content);
 	},
 
 	showSystemMessage: function(conversation_id, message)
@@ -391,7 +429,7 @@ var Casada =
 		message_box.show();
 
 		//Update scrollbar focus if user is on the current conversation
-		if (this.chats[this.current_chat_index].id == `#chat-${room_name}`)
+		if (this.current_chat_id == conversation_id)
 			message_box.scrollIntoView();
 
 	},
@@ -416,7 +454,7 @@ var Casada =
 					"1234": "unknown"};
 
 				// Delete connected rooms from the list of available rooms
-				Casada.connected_rooms.map(room => room.name).forEach( room_name =>
+				Object.keys(Casada.connected_rooms).forEach( room_name =>
 				{
 					delete Casada.available_rooms[room_name];
 				});
@@ -447,10 +485,10 @@ var Casada =
 		let room_info = await Casada.serverGetRoomInfo.bind(client)(client.room.name);
 
 		// Set client room clients property
-		this.connected_rooms.find(room => room.name == client.room.name).clients = room_info.clients;
+		this.connected_rooms[client.room.name].clients = room_info.clients;
 
 		// Set chat clients
-		this.chats.find(chat => chat.room == client.room.name).clients = room_info.clients;
+		this.chats[client.room.name].clients = room_info.clients;
 	},
 
 	serverLoadAvailableRooms: async function()
@@ -508,8 +546,11 @@ var Casada =
 				Casada.createPrivateContent.bind(this)(client_id);
 		}
 
+		// Set chat profile status
+		Casada.updateChatProfile();
+
 		// Init scrolls
-		Casada.initScrolls.bind(Casada)();
+		Casada.initScrolls();
 	},
 
 	createRoomContent: function(client_info)
@@ -529,11 +570,15 @@ var Casada =
 		chat_last_message.innerText = "Last sent message";
 
 		// First chat
-		const first_chat = Casada.connected_rooms.length == 1 ? true : false;
+		const first_chat = Object.keys(Casada.connected_rooms).length == 1 ? true : false;
+		if(first_chat) Casada.current_chat_id = this.room.name;
+
+		// Room status
+		const room_status = client_info.length == 1 ? false : true;
 
 		// Set chat id and class
 		new_chat.id = `chat-${this.room.name}`;
-		new_chat.className = first_chat ? "current" : "chat";
+		new_chat.className = (first_chat ? "current" : "chat") + (room_status ? "" : " offline-chat");
 
 		// Set conversation id and class
 		new_conversation.id = `conversation-${this.room.name}`;
@@ -551,19 +596,18 @@ var Casada =
 		const room_chat = 
 		{
 			room : this.room.name,
-			id : this.room.name,
 			type : "group",
 			clients : client_info,
+			online: room_status
 		}
-		Casada.chats.push(room_chat);
+		Casada.chats[this.room.name] = room_chat;
 
 		// Append new conversation to the log
 		const room_conversation =
 		{
-			id: this.room.name,
 			messages: [],
 		}
-		Casada.conversation_log.push(room_conversation);
+		Casada.conversation_log[this.room.name] = room_conversation;
 		
 	},
 
@@ -603,11 +647,48 @@ var Casada =
 		const private_chat = 
 		{
 			room : this.room.name,
-			id : client_id,
 			type : "private",
 			clients : [client_id],
+			online: true
 		}
-		Casada.chats.push(private_chat);
+		Casada.chats[client_id] = private_chat;
+	},
+
+	updateChatProfile: function()
+	{
+		// Profile chat vars
+		const current_chat = this.chats[this.current_chat_id];
+		const current_room = current_chat.room;
+		const chat_profile = document.get(".grid-chat-profile .contents");
+		const username = chat_profile.get(".username");
+		const status = chat_profile.get(".status");
+
+		// Update profile chat username and status
+		username.innerText = this.current_chat_id;
+		if(current_chat.type == "private")
+		{
+			current_chat.online ? status.innerText = "Online" : status.innerText ="Offline";
+		}
+		else
+		{
+			if (!current_chat.online)
+			{
+			status.innerText = "You" 
+			}
+			else				
+			{
+				let result = "You, ";
+				current_chat.clients.forEach(id => 
+				{ 
+					
+					if (id != this.my_user.ids[current_room]) 
+					{
+						result += `${id}, `;
+					}
+				});
+				status.innerText = result.slice(0, -2);
+			};
+		}				
 	},
 
 	initScrolls: function()
@@ -667,19 +748,26 @@ var Casada =
 		// Check input is not empty
 		if (this.input.value == '') return;
 
+		// Auxiliar variables
+		const type = this.chats[this.current_chat_id].type == "private";
+
 		// Send private or public message
-		switch(true)
+		switch(type)
 		{
-			case this.chats[this.current_chat_index].type == "private":
+			case true:
 				this.sendPrivateMessage.bind(this)();
 				break;
-			case this.chats[this.current_chat_index].type == "group":
+			case false:
 				this.sendPublicMessage.bind(this)();
 				break;
 		}
 
+		// Update last message
+		this.updateLastMessage(this.current_chat_id, type ? null : "You", this.input.value);
+
 		// Clean input box
 		this.input.value = '';
+
 	},
 
 	sendPrivateMessage: function()
@@ -711,7 +799,7 @@ var Casada =
 		message_box.scrollIntoView();
 
 		// Get current chat
-		const current_chat = this.chats[this.current_chat_index];
+		const current_chat = this.chats[this.current_chat_id];
 
 		// Build message
 		const message = new this.Message("private", null, this.my_user.ids[current_chat.room], this.input.value, date.getTime());
@@ -773,17 +861,22 @@ var Casada =
 		message_box.scrollIntoView();
 
 		// Get current chat
-		const current_chat = this.chats[this.current_chat_index];
+		const current_chat = this.chats[this.current_chat_id];
 
 		// Build message
 		const message = new this.Message("text", null, this.my_user.ids[current_chat.room], this.input.value, date.getTime());
 		const string_message = JSON.stringify(message);
 
 		// Store message in the DB
-		this.conversation_log.find(conversation => conversation.id == current_chat.room).messages.push(string_message);
+		this.conversation_log[current_chat.room].messages.push(string_message);
 
 		// Send public message to the room
 		this.clients.find(client => client.room.name == current_chat.room).sendMessage(string_message);
+	},
+
+	updateLastMessage: function(chat_id, sender, message)
+	{
+		this.HTML_chats.get(`#chat-${chat_id} .last-message`).innerText = sender ? `${sender}: ${message}` : message;
 	},
 
 	filterChats:function()
@@ -842,15 +935,15 @@ var Casada =
 	{
 		// Declare some vars
 		const regex = /chat-[A-Za-z]+|chat-[1-9]+/;
-		const current_chat = this.HTML_chats.get(".current");
-		const current_conversation = this.HTML_conversations.get(".current");
+		const current_html_chat = this.HTML_chats.get(".current");
+		const current_html_conversation = this.HTML_conversations.get(".current");
 		
 		for (const element of event.srcElement.getParents())
 		{
 			if(element.id != undefined && element.id.match(regex) != null)
 			{
 				// Swap current selected chat to not selected
-				current_chat.classList.replace("current", "chat");
+				current_html_chat.classList.replace("current", "chat");
 
 				// Select the clicked chat
 				element.classList.replace("chat", "current");
@@ -859,10 +952,10 @@ var Casada =
 				const new_conversation = document.get(`#${element.id.replace("chat", "conversation")}`);
 
 				// Save current scroll
-				if(current_conversation.id != null) this.conversation_scrolls[current_conversation.id] = current_conversation.parentElement.scrollTop;
+				if(current_html_conversation.id != null) this.conversation_scrolls[current_html_conversation.id] = current_html_conversation.parentElement.scrollTop;
 
 				// Swap current conversation to not selected
-				current_conversation.classList.replace("current", "not-current");
+				current_html_conversation.classList.replace("current", "not-current");
 
 				// Change to the conversation of the clicked chat
 				new_conversation.classList.replace("not-current", "current");
@@ -870,8 +963,11 @@ var Casada =
 				// Set clicked conversation scroll
 				new_conversation.parentElement.scroll(0, this.conversation_scrolls[element.id.replace("chat", "conversation")]);
 
-				// Update current chat index
-				this.current_chat_index = this.chats.findIndex(chat => chat.id == element.id.substring(5));
+				// Update current chat var
+				this.current_chat_id = element.id.substring(5);
+
+				// Set chat profile status
+				this.updateChatProfile();
 
 				//End execution
 				break;

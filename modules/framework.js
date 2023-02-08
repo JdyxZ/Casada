@@ -74,7 +74,14 @@ HTMLElement.prototype.get = function(selector)	{
 	}
 	else if (query == null)
 	{
-		console.log(`WARNING: Selector '${selector}' has not been found in the DOM. Returning an empty div`);
+		console.log(`WARNING: Selector '${selector}' has not been found in the following HTML Element:
+		\t - tag: ${this.tagName} 
+		\t - id: ${this.id ? this.id : 'none'} 
+		\t - class: ${this.className ? this.className : 'none'}
+		Returning an empty div`);
+
+		console.log(this);
+
 		return this.appendChild(document.createElement("div"));
 	}
 	else

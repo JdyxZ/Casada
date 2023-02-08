@@ -68,20 +68,15 @@ body
 
 .grid-user-profile
 {
-    display: flex;
-    place-content: start;
     background-color: var(--featured-color1);
     grid-column: 1;
     grid-row: 1;
     padding: 15px 15px 15px 15px;
     margin-right: 0.03cm;
-    overflow: hidden;
 }
 
 .grid-chat-profile
 {
-    display:flex;
-    place-content: start;
     background-color: var(--featured-color1);
     grid-column: 2;
     grid-row: 1;
@@ -160,6 +155,9 @@ background-color: var(--light3-dark-color);
 }
 
 /* USER PROFILE */
+.grid-user-profile .contents
+{display: flex;place-content: start;overflow: hidden;}
+
 .grid-user-profile .avatar
 {
     width:50px;
@@ -172,7 +170,7 @@ background-color: var(--light3-dark-color);
 #username
 {
     width: 60%;
-    margin-top:4%;
+    margin-top: 3.5%;
 }
 
 #new-chat-trigger
@@ -185,6 +183,12 @@ background-color: var(--light3-dark-color);
 }
 
 /* CURRENT CHAT PROFILE */
+.grid-chat-profile .contents
+{
+    display: flex;
+    place-content: start;
+}
+
 .grid-chat-profile .avatar
 {
     width:50px;
@@ -196,7 +200,7 @@ background-color: var(--light3-dark-color);
 
 .grid-chat-profile .info
 {
-    transform: translate(0px, -3px);
+    transform: translate(0px, -2px);
     overflow: hidden;
 }
 
@@ -278,12 +282,13 @@ background-color: var(--light3-dark-color);
 
 #chats .chat
 {
-    display:flex;
-    padding-top: 15px;
-    padding-bottom: 15px;
-    padding-left: 18px;
     direction: ltr;
     transition: background-color 1ms;
+}
+
+#chats .offline-chat
+{
+    opacity: 0.5;
 }
 
 #chats .chat:hover
@@ -293,12 +298,14 @@ background-color: var(--light3-dark-color);
 
 #chats .current
 {
-    display:flex;
-    padding-top: 15px;
-    padding-bottom: 15px;
-    padding-left: 18px;
     direction: ltr;
     background-color: var(--featured-color1);
+}
+
+#chats .padding
+{
+    display: flex;
+    padding: 15px 0px 15px 18px;
 }
 
 #chats .info
@@ -306,6 +313,7 @@ background-color: var(--light3-dark-color);
     display: inline-block;
     width: -webkit-fill-available;
     overflow-x: clip;
+    margin-right: 10px;
 }
 
 #chats .username

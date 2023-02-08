@@ -27,25 +27,29 @@
 - SillyServer.
     - Load rooms.✅
     - Room change. ✅
-    - Send and receive messages.
-    - Show and receive user info on connect.
-    - Define an enum for the message type.
-    - Create a global variable to control current chat info.
-    - Conversation status messages.
-    - Conversation status.
-    - Last sent message.
+    - Send and receive messages.✅
+    - Define an enum for the message type.❌
+    - Create a global variable to control current chat info.✅
+    - Show and receive user info on connect.✅
+    - Fade chat when user leaves.✅
+    - Send images over internet. 
+    - Users database.
+    - Create a room menu.
+    - Conversation status messages.✅
+    - Conversation status.⏺
+    - Last sent message.⏺
     - Send log.
+    - Several client instances.✅
 - Sort chats based on the most recent message (with animation?).
+- Avatar selector.
 - Unread message status.
 - Cross animation.
 - Checked message.
 - Change the background.
 - Conversation messages search bar.
-- Avatar selector.
 - When click out of the scope of room menu, exit menu.
 - Change messages CSS.
 - Last details: Choose room, avatar, nick on enter; etc.
-- Several client instances.
 
 ## Notas
 white color : eaeaea
