@@ -54,3 +54,5 @@
 
 ## Notas
 white color : eaeaea
+
+delete db data -> Casada.clients[0].storeData("Casada", undefined);

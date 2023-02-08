@@ -1,5 +1,5 @@
 /***************** NAMESPACE *****************/
-import {fs} from 'fs';
+
 var Casada =
 {
 	// Root
@@ -190,7 +190,7 @@ var Casada =
 		console.log(`Connection with the server in room ${this.room.name} successfully established`);
 
 		// Send user data
-		//this.sendUserData(this);
+		Casada.sendUserData(this);
 	},
 
 	onServerFail: function()
@@ -206,9 +206,6 @@ var Casada =
 	{
 		// Alert the user the server has been shut down
 		alert(`Warning: The server has been shut down`);
-
-		// Delete user data
-		//Object.values(Casada.my_user.ids).forEach(id => this.storeData(`Casada_${id}`, undefined));
 	},
 
 	onServerReady: function(id)
@@ -241,7 +238,7 @@ var Casada =
 		}
 
 		// Send profile info
-		//Casada.sendProfileInfoReady(this);
+		Casada.sendProfileInfoReady(this, Casada.my_user.ids[this.room.name]);
 
 		//Update chat profile
 		Casada.updateChatProfile();
@@ -630,8 +627,9 @@ var Casada =
 		let chat_last_message = new_chat.get(".info .last-message");
 
 		// Set chat contents
-		chat_avatar.src = "images/default_avatar.jpg";
-		chat_username.innerText = client_id;
+		const user = Casada.users[client_id];
+		chat_avatar.src = user == null ? "images/default_avatar.jpg" : user.avatar;
+		chat_username.innerText = user == null ? client_id : user.nick;
 		chat_last_message.innerText = "Last sent message";
 
 		// Set chat id and class
@@ -667,11 +665,14 @@ var Casada =
 		const current_chat = this.chats[this.current_chat_id];
 		const current_room = current_chat.room;
 		const chat_profile = document.get(".grid-chat-profile .contents");
+		const user = this.users[this.current_chat_id];
+		const avatar = chat_profile.get(".avatar");
 		const username = chat_profile.get(".username");
 		const status = chat_profile.get(".status");
 
-		// Update profile chat username and status
-		username.innerText = this.current_chat_id;
+		// Update profile chat info
+		avatar.src = user == null ?  "images/default_avatar.jpg" : user.avatar;
+		username.innerText = user == null ? this.current_chat_id : user.nick;
 		if(current_chat.type == "private")
 		{
 			current_chat.online ? status.innerText = "Online" : status.innerText ="Offline";
@@ -1127,26 +1128,32 @@ var Casada =
 
 	sendUserData: function(client)
 	{
-		// Some vars
-		const user_id = this.my_user.ids[client.room.name];
-		const user_nick = this.my_user.nick.value;
-		const user_avatar = this.my_user.avatar.src;
+		client.loadData("Casada", (data) => {
+			// Parse obj
+			let obj = JSON.parse(data || "{}");
 
-		// Create object
-		const obj = 
-		{
-			nick: user_nick,
-			avatar: user_avatar
-		}
+			// Some vars
+			const user_id = this.my_user.ids[client.room.name];
+			const user_nick = this.my_user.nick.innerText;
+			const user_avatar = this.my_user.avatar.src;
+	
+			// Update obj
+			obj[user_id] = 
+			{
+				nick: user_nick,
+				avatar: user_avatar
+			}
 
-		// Store data in the db (not sure about race condition protection)
-		client.storeData(`Casada_${user_id}`, JSON.stringify(obj), () => {
-			this.sendProfileInfoReady(client);
+			// Store data in the db (not sure about race condition protection)
+			client.storeData("Casada", JSON.stringify(obj), () => {
+				this.sendProfileInfoReady(client, user_id);
+			});
+			
 		});
 		
 	},
 
-	sendProfileInfoReady : function(client)
+	sendProfileInfoReady : function(client, user_id)
 	{
 		// Build message
 		const message = new this.Message("profile", user_id, null, null);
@@ -1159,13 +1166,22 @@ var Casada =
 	loadUserData: function(client, message)
 	{
 		// Fetch avatar
-		client.loadData(`Casada_${message.user}`, (data) => {
+		client.loadData("Casada", (data) => {
 			// Parse data to object
-			obj = JSON.parse(data);
+			const obj = JSON.parse(data);
 
 			// Store data in users object
-			this.users[message.user] = obj;
+			this.users[message.user] = obj[message.user];
 		});
+
+		// Set username and avatar
+		const chat = this.HTML_chats.get(`#chat-${message.user}`);
+		const user = this.users[message.user];
+		chat.get(".username").innerText =  user == null ? this.current_chat_id : user.nick;
+		chat.get(".avatar").src = user == null ?  "images/default_avatar.jpg" : user.avatar;
+
+		// Update profile info
+		this.updateChatProfile();
 	},
 
 	hideEmojiPicker: function(event)
