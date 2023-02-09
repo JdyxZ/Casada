@@ -42,7 +42,8 @@
     - Last sent message.✅
     - Store & send log.⏺ (solve bug on different client different layout)
     - Several client instances.✅
-- Reorganize code.
+    - Typing.
+- Reorganize code.✅
 - Check binds, squeeze code, if (null) return.
 - Sort chats based on the most recent message (with animation?).
 - Unread message status.
@@ -52,6 +53,7 @@
 - Conversation messages search bar.
 - When click out of the scope of room menu, exit menu.
 - Change messages CSS.
+- Resolve, fail.
 - Last details: Choose room, avatar, nick on enter; etc.
 
 ## Notas
