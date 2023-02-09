@@ -32,17 +32,18 @@
     - Create a global variable to control current chat info.✅
     - Show and receive user info on connect.✅
     - Fade chat when user leaves.✅
-    - Send images over internet. 
-    - Users database.
+    - Send images over internet. ✅
+    - Users database. ✅
     - Create a room menu.
+    - Avatar selector.
+    - Resizable menus.
     - Conversation status messages.✅
-    - Conversation status.⏺
-    - Last sent message.⏺
-    - Send log.
+    - Conversation status.✅
+    - Last sent message.✅
+    - Store & send log.⏺ (solve bug on different client different layout)
     - Several client instances.✅
-- Check binds.
+- Check binds, squeeze code, if (null) return.
 - Sort chats based on the most recent message (with animation?).
-- Avatar selector.
 - Unread message status.
 - Cross animation.
 - Checked message.
@@ -54,5 +55,3 @@
 
 ## Notas
 white color : eaeaea
-
-delete db data -> Casada.clients[0].storeData("Casada", undefined);

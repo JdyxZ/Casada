@@ -44,7 +44,12 @@ Number.prototype.clamp = function(min, max)
 
 Date.prototype.getTime = function() 
 {
-	return this.getHours().toString().padStart(2,"0") + ":" + this.getMinutes().toString().padStart(2, "0")
+	return `${this.getHours().toString().padStart(2,"0")}:${this.getMinutes().toString().padStart(2, "0")}`
+};
+
+Date.prototype.getDate = function() 
+{
+	return `${this.getDay().toString().padStart(2,"0")}/${this.getMonth().toString().padStart(2, "0")}/${this.getFullYear()}`;
 };
 
 HTMLElement.prototype.getParents = function()

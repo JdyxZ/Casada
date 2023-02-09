@@ -439,7 +439,7 @@ background-color: var(--light3-dark-color);
     height: 40px;
     object-fit: cover;
     border-radius: 100%;
-    margin-left: 20px;
+    margin-left: 15px;
     transform: translate(0px, -15px);
 }
 
