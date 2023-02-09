@@ -42,6 +42,7 @@
     - Last sent message.✅
     - Store & send log.⏺ (solve bug on different client different layout)
     - Several client instances.✅
+- Reorganize code.
 - Check binds, squeeze code, if (null) return.
 - Sort chats based on the most recent message (with animation?).
 - Unread message status.
