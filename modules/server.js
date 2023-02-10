@@ -71,19 +71,15 @@ var Server =
 	{
 		// Inform the user the connection has been successfully established
 		console.log(`Connection with the server in room ${this.room.name} successfully established`);
-
-		// Send user data
-		await Server.storeUserData();
-		Casada.sendProfileInfoReady(this, Casada.my_user.ids[this.room.name]);
 	},
 
 	onFail: function()
 	{
 		// Alert the user the connection with the server could not been established
-		alert(`The connection to the server address ${this.server_address} has failed. Trying to reconnect`);
+		alert(`The connection to the server address ${Server.server_address} has failed. Trying to reconnect`);
 
 		// Reconnect
-		Casada.setConnection(this.server_address, this.room.name);
+		Server.setConnection.bind(this)(Server.server_address, this.room.name);
 	},
 
 	onClose: function()
@@ -103,66 +99,40 @@ var Server =
 
 	onUserJoin: async function(client_id)
 	{
-        // Define status message
-        const status_msg = `The user ${client_id} has joined the room`;
-
 		// Inform the user a new client has joined the room
-		console.log(status_msg);
-
-		// Create a new private chat and conversation
-		Casada.loadPrivateChat(this.room.name, client_id);	
+		const user = Casada.users[client_id];
+		console.log(`${user == null ? client_id: user.nick} has joined the room`);
 
 		// Update clients lists
 		await Casada.updateRoomInfo(this.room.name);
 
-		// Show system message
-		Casada.showSystemMessage(this.room.name, status_msg);
+		// Create a new private chat and conversation
+		Casada.loadPrivateChat(this.room.name, client_id);	
 
-		// Change room chat status
-		const room_chat = Casada.chats[this.room.name];
-		if (!room_chat.online)
-		{
-			Casada.HTML_chats.get(`#chat-${this.room.name}`).classList.remove("offline-chat");
-			room_chat.online = true;
-		}
-
-		// Send profile info
-		Casada.sendProfileInfoReady(this, Casada.my_user.ids[this.room.name]);
+		// Remove fade class if required
+		Casada.changeRoomFade(this.room.name, client_id, "on");
 
 		//Update chat profile
 		Casada.updateChatProfile();
 	},
 
 	onUserLeft: async function(client_id)
-	{
-        // Define status messages
-        const status_msg = `The user ${client_id} has left the room`;
-        const private_status_msg = `The user has left the room and is no longer available`;
-
+	{		
 		// Inform the user a new client has left the room
-		console.log(status_msg);
+		const user = Casada.users[client_id];
+		console.log(`${user == null ? client_id: user.nick} has left the room`);
 
 		// Update clients lists
-		await Casada.updateRoomInfo(this.room.name);
+		await Casada.updateRoomInfo(this.room.name);	
 
-		// Show system message
-		Casada.showSystemMessage(this.room.name, status_msg);
-		Casada.showSystemMessage(client_id, private_status_msg);		
-
-		// Change room chat status
-		const room_chat = Casada.chats[this.room.name];
-		if (room_chat.clients.length == 1)
-		{
-			Casada.HTML_chats.get(`#chat-${this.room.name}`).classList.add("offline-chat");
-			room_chat.online = false;
-		}
-
-		// Change private chat status
-		Casada.chats[client_id].online = false;
-		Casada.HTML_chats.get(`#chat-${client_id}`).classList.add("offline-chat");
+		// Place fade class if required
+		Casada.changeRoomFade(this.room.name, client_id, "off");
 
 		//Update chat profile
 		Casada.updateChatProfile();
+
+		// Show exit message and store it if user is the master
+		Casada.setUpExit(this, Casada.connected_rooms[this.room.name].master);
 	},
 
 	onRoomInfo: async function(room_info)
@@ -171,21 +141,27 @@ var Server =
 		const new_room =
 		{
 			clients : room_info.clients,
-			oldest : Math.min(room_info.clients)
+			master : Math.min(room_info.clients)
 		};
 		Casada.connected_rooms[this.room.name] = new_room;
 
-		// Load rooms
+		// Load available rooms
 		Casada.updateAvailableRooms();
 
-		// Create chats
-		Casada.loadChats(this.room.name, room_info.clients);
-		
 		// Load user data
 		await Server.loadUsersData();
 
+		// Create chats
+		Casada.loadChats(this.room.name, room_info.clients);
+
 		// Load log
-		Server.loadRoomLog(this.room.name);
+		await Server.loadRoomLog(this.room.name);
+
+		// Store my data
+		await Server.storeUserData();
+
+		// Communicate to the rest that user info is ready, send status messages to them and print (and store) its own status message
+		Casada.setUpEntrance(this, new_room.master);
 	},
 
 	onMessage: function(user_id, message_string)
@@ -203,15 +179,20 @@ var Server =
 				console.log("typing");
 				break;
 			case "private":
-				Casada.showPrivateMessage(message.user, message);
+				Casada.showPrivateMessage(message.user, message.content);
 				break;
 			case "system":
 				Casada.showSystemMessage(this.room.name, message.content);
 				break;
-			case "profile":
+			case "profile":	
 				Server.loadUserData(message.user);
 				break;
-		}		
+		}
+		
+		// Store status messages in the DB
+		if(message.type == "system" && Casada.my_user.ids[this.room.name] == Casada.connected_rooms[this.room.name].master)
+			Server.storeMessage(this.room.name, message);
+			
 	},
 
     /********************************** SERVER TOOLS **********************************/
@@ -289,7 +270,7 @@ var Server =
 				}
 	
 				// Store data in the db (not sure about race condition protection)
-				client.storeData("Casada_users", JSON.stringify(obj), () => resolve());
+				client.storeData("Casada_users", JSON.stringify(obj, null, 2), () => resolve());
 			});
 		});		
 	},
@@ -303,7 +284,7 @@ var Server =
 		client.loadData("Casada_users", (data) => {
 
 			// Check data before processing
-			if(data == undefined) return
+			if(data == undefined) return;
 
 			// Parse data to object
 			const obj = JSON.parse(data);
@@ -330,7 +311,11 @@ var Server =
 			client.loadData("Casada_users", (data) => {
 
 				// Check data before processing
-				if(data == undefined) return
+				if(data == undefined) 
+				{
+					resolve();
+					return;
+				}
 
 				// Parse data to object
 				const obj = JSON.parse(data);
@@ -358,62 +343,64 @@ var Server =
 			let obj = JSON.parse(data || "{}");
 	
 			// Update obj
-			obj[room_name] == undefined ? obj[room_name] = [message] : obj[room_name].push(message);				
+			obj[room_name] == undefined ? obj[room_name] = [message] : obj[room_name].push(message);
 
 			// Store data in the db (not sure about race condition protection)
-			client.storeData("Casada_log", JSON.stringify(obj));
+			client.storeData("Casada_log", JSON.stringify(obj, null, 2));
 		});
 		
 	},
 
 	loadRoomLog: async function(room_name)
 	{
-        // Get client
-        const client = await this.getClient(0);
+		// Get client
+		const client = await this.getClient(0);
 
-		// Fetch log
-		client.loadData("Casada_log", (data) => {
+		return new Promise(resolve => {
 
-			// Check data before processing
-			if(data == undefined)
-			{
-				const date = new Date();
-				Casada.showSystemMessage(room_name, `Room conversation started the ${date.getDate()} at ${date.getTime()}`);
-				return
-			} 
+			// Fetch log
+			client.loadData("Casada_log", (data) => {
 
-			// Parse data to object
-			const obj = JSON.parse(data);
+				// Parse data to object
+				const obj = JSON.parse(data || "{}");
 
-			// Check whether there is any message
-			if(obj[room_name] == undefined)
-			{
-				const date = new Date();
-				Casada.showSystemMessage(room_name, `Room conversation started the ${date.getDate()} at ${date.getTime()}`);
-			}
-
-			// Load data
-			obj[room_name].forEach( string_message => {
-	
-				// Parse to object
-				const message = JSON.parse(string_message);
-
-				// Build room messages depending on the message type
-				switch(message.type)
+				// Check whether there is data about the room
+				if(obj[room_name] == undefined)
 				{
-					case "text":
-						Casada.showGroupMessage(room_name, message);
-						break;
-					case "system":
-						Casada.showSystemMessage(room_name, message.content);
-						break;
-				}				
+					// Create message
+					const date = new Date();
+					const msg_content = `Room created the ${date.getDate()} at ${date.getTime()}`;
+					const message = new Casada.Message("system", "Casada", msg_content, date.getTime());
+
+					//Store message
+					Server.storeMessage(room_name, message)
+
+					// Show message
+					Casada.showSystemMessage(room_name, message.content);
+					resolve();
+					return;
+				}
+
+				// Load data
+				obj[room_name].forEach( message => {
+
+					// Build room messages depending on the message type
+					switch(message.type)
+					{
+						case "text":
+							Casada.showGroupMessage(room_name, message);
+							break;
+						case "system":
+							Casada.showSystemMessage(room_name, message.content);
+							break;
+					}				
+				});
+
+				// Resolve
+				resolve();
 			});
-
-
-
 		});
-	},
+	},	
 
 	fetchUserData: async function()
 	{

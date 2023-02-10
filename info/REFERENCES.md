@@ -32,6 +32,8 @@ https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event
 https://stackoverflow.com/questions/36869615/how-to-edit-an-external-json-file-in-javascript
 https://stackoverflow.com/questions/5409641/set-a-variable-if-undefined-in-javascript
 
+https://stackoverflow.com/questions/4810841/pretty-print-json-using-javascript 
+
 
 
 

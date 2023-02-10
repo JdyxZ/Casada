@@ -171,10 +171,10 @@ var Casada =
 		switch(type)
 		{
 			case true:
-				this.sendPrivateMessage.bind(this)();
+				this.sendPrivateMessage();
 				break;
 			case false:
-				this.sendPublicMessage.bind(this)();
+				this.sendPublicMessage();
 				break;
 		}
 
@@ -267,20 +267,20 @@ var Casada =
 
 		// Build and send public message through WebSocket
 		const message = new this.Message("text", this.my_user.ids[current_chat.room_name], this.input.value, date.getTime());
-		const string_message = JSON.stringify(message);
-		client.sendMessage(string_message);
+		const message_string = JSON.stringify(message);
+		client.sendMessage(message_string);
 
 		// Store message in the DB
-		Server.storeMessage(current_chat.room_name, string_message)	
+		Server.storeMessage(current_chat.room_name, message)	
 	},
 
-	sendProfileInfoReady : function(client, user_id)
+	sendLogReady: function(client)
 	{
 		// Build message
-		const message = new this.Message("profile", user_id, null, null);
+		const message = new this.Message("history", "Casada", null, null);
 		const string_message = JSON.stringify(message);
 
-		// Send message reporting username and avatar
+		// Send message informing the log is ready
 		client.sendMessage(string_message);
 	},
 
@@ -373,8 +373,6 @@ var Casada =
 		// Fetch data
 		const conversation = this.HTML_conversations.get(`#conversation-${conversation_id}`);
 		const current_chat = this.chats[this.current_chat_id];
-		const room = this.connected_rooms[conversation_id];
-		const user_id = this.my_user.ids[conversation_id];
 
 		// Clone status message template and set it up
 		let message_box = this.status_message_template.cloneNode(true);	
@@ -392,13 +390,6 @@ var Casada =
 		//Update scrollbar focus if user is on the current conversation
 		if (this.current_chat_id == conversation_id)
 			message_box.scrollIntoView();
-
-		// If the user is the oldest user in the room, store the message in the db
-		if(current_chat.room_name == conversation_id && room.oldest == user_id)
-		{
-			const status_message = new this.Message("system", user_id, message, null);
-			Server.storeMessage(current_chat.room_name, JSON.stringify(status_message));
-		}
 	},
 
 	/********************************** LOAD CHATS **********************************/
@@ -555,6 +546,79 @@ var Casada =
 		
 	},
 
+	changeRoomFade: function(room_name, client_id, mode)
+	{
+		if(mode == "on")
+		{
+			// Change room chat status
+			const room_chat = Casada.chats[room_name];
+			if (!room_chat.online)
+			{
+				Casada.HTML_chats.get(`#chat-${room_name}`).classList.remove("offline-chat");
+				room_chat.online = true;
+			}
+		}
+		else if (mode == "off")
+		{
+			// Change room chat status
+			const room_chat = this.chats[room_name];
+			if (room_chat.clients.length == 1)
+			{
+				Casada.HTML_chats.get(`#chat-${room_name}`).classList.add("offline-chat");
+				room_chat.online = false;
+			}
+
+			// Change private chat status
+			Casada.HTML_chats.get(`#chat-${client_id}`).classList.add("offline-chat");
+			Casada.chats[client_id].online = false;
+		}	
+	},
+
+	/********************************** USER ENTRANCE AND EXIT **********************************/
+
+	setUpEntrance: function(client, master)
+	{
+		// Get vars
+		const room_name = client.room.name
+		const user_id = Casada.my_user.ids[room_name];
+		const user_nick = Casada.my_user.nick.innerText;
+
+		// Build messages
+		const date = new Date();
+		const ping = new this.Message("profile", user_id, null, null); // ping informing the user info is ready
+		const join = new this.Message("system", "Casada", `${user_nick} has joined the room`, date.getTime()); // join message
+
+		// Send messages
+		client.sendMessage(JSON.stringify(ping, null, 2)); 
+		client.sendMessage(JSON.stringify(join, null, 2)); 
+
+		// If current user is the master (the oldest one), store the join message
+		if(user_id == master)
+			Server.storeMessage(room_name, join); 
+
+		// Show entrance message
+		this.showSystemMessage(room_name, "You have joined the room");
+	},
+
+	setUpExit: function(client, master)
+	{
+		// Get vars
+		const room_name = client.room.name
+		const user_id = Casada.my_user.ids[room_name];
+		const user_nick = Casada.my_user.nick.innerText;
+
+		// Build exit message
+		const date = new Date();
+		const exit = new this.Message("system", "Casada", `${user_nick} has left the room`, date.getTime());
+
+		// Show exit message
+		this.showSystemMessage(room_name, exit.content);
+
+		// If current user is the master (the oldest one), store the exit message
+		if(user_id == master)
+			Server.storeMessage(room_name, exit); 
+	},
+
 	/********************************** UPDATES **********************************/
 
 	updateAvailableRooms: async function()
@@ -571,10 +635,10 @@ var Casada =
 		// Fetch clients info
 		let room_info = await Server.getRoomInfo(room_name);
 
-		// Set room clients and oldest client
+		// Set room clients and master client
 		const room = this.connected_rooms[room_name];
 		room.clients = room_info.clients;
-		room.oldest = Math.min(room_info.clients);
+		room.master = Math.min.apply(Math, room_info.clients);
 
 		// Set chat clients
 		this.chats[room_name].clients = room_info.clients;
