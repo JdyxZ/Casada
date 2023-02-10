@@ -114,6 +114,9 @@ var Server =
 
 		//Update chat profile
 		Casada.updateChatProfile();
+
+		// Show join message in room chat
+		Casada.showJoin(this);
 	},
 
 	onUserLeft: async function(client_id)
@@ -173,7 +176,7 @@ var Server =
 		switch(message.type)
 		{
 			case "text":
-				Casada.showGroupMessage(this.room.name, message);
+				Casada.showRoomMessage(this.room.name, message);
 				break;
 			case "typing":
 				console.log("typing");
@@ -188,10 +191,6 @@ var Server =
 				Server.loadUserData(message.user);
 				break;
 		}
-		
-		// Store status messages in the DB
-		if(message.type == "system" && Casada.my_user.ids[this.room.name] == Casada.connected_rooms[this.room.name].master)
-			Server.storeMessage(this.room.name, message);
 			
 	},
 
@@ -280,7 +279,7 @@ var Server =
         // Get client
         const client = await this.getClient(0);
 
-		// Fetch user data
+		// Fetch cloud user data
 		client.loadData("Casada_users", (data) => {
 
 			// Check data before processing
@@ -289,7 +288,7 @@ var Server =
 			// Parse data to object
 			const obj = JSON.parse(data);
 
-			// Store data in users object
+			// Store cloud data in local storage
 			Casada.users[user_id] = obj[user_id];
 
 			// Update chat
@@ -307,7 +306,7 @@ var Server =
 
 		return new Promise( resolve =>
 		{
-			// Fetch user data
+			// Fetch cloud user data
 			client.loadData("Casada_users", (data) => {
 
 				// Check data before processing
@@ -320,7 +319,7 @@ var Server =
 				// Parse data to object
 				const obj = JSON.parse(data);
 
-				// Store data in users object
+				// Store cloud data in local storage
 				Object.entries(obj).forEach( (entry) => {
 					Casada.users[entry[0]] = entry[1];
 				});
@@ -342,8 +341,9 @@ var Server =
 			// Parse obj
 			let obj = JSON.parse(data || "{}");
 	
-			// Update obj
+			// Update cloud and local data
 			obj[room_name] == undefined ? obj[room_name] = [message] : obj[room_name].push(message);
+			Casada.conversations_log[room_name] == undefined ? Casada.conversations_log[room_name] = [message] : Casada.conversations_log[room_name].push(message);
 
 			// Store data in the db (not sure about race condition protection)
 			client.storeData("Casada_log", JSON.stringify(obj, null, 2));
@@ -358,7 +358,7 @@ var Server =
 
 		return new Promise(resolve => {
 
-			// Fetch log
+			// Fetch cloud log
 			client.loadData("Casada_log", (data) => {
 
 				// Parse data to object
@@ -381,14 +381,17 @@ var Server =
 					return;
 				}
 
+				// Copy cloud data in local storage
+				Casada.conversations_log = obj;
+
 				// Load data
-				obj[room_name].forEach( message => {
+				obj[room_name].forEach( message => {					
 
 					// Build room messages depending on the message type
 					switch(message.type)
 					{
 						case "text":
-							Casada.showGroupMessage(room_name, message);
+							Casada.showRoomMessage(room_name, message);
 							break;
 						case "system":
 							Casada.showSystemMessage(room_name, message.content);

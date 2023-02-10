@@ -17,7 +17,7 @@ var Casada =
 	HTML_conversations : document.get("#conversations"),
 
 	//Users
-	users : {},
+	users : {}, // local copy of users data
 	my_user : 
 	{
 		avatar : document.get("#user-avatar"),
@@ -34,6 +34,9 @@ var Casada =
 	// Chats
 	chats : {},
 	current_chat_id : "",
+
+	// Conversations
+	conversations_log : {}, // local copy of conversation log
 
 	// Scroll
 	conversation_scrolls : {},
@@ -131,10 +134,7 @@ var Casada =
 		}
 		
 		if(event.code == "Escape")
-		{
-			Casada.hideEmojiPicker();
-
-		}
+			EmojiPicker.hideEmojiPicker();
 		
 	},
 
@@ -147,13 +147,11 @@ var Casada =
 		*/
 
 		if(this.id == "chat-search-bar")
-		{
 			Casada.filterChats();
-		}
+		
 		else if(this.id == "menu-room")
-		{
 			Menu.room_people.innerText = "0";
-		}
+
 
 	},
 
@@ -174,7 +172,7 @@ var Casada =
 				this.sendPrivateMessage();
 				break;
 			case false:
-				this.sendPublicMessage();
+				this.sendRoomMessage();
 				break;
 		}
 
@@ -186,57 +184,26 @@ var Casada =
 
 	},
 
-	sendPrivateMessage: function()
+	sendRoomMessage: function()
 	{
 		// Create vars
 		const current_conversation = this.HTML_conversations.get(".current");
 		const current_chat = this.chats[this.current_chat_id];
-		const client = Server.clients.find(client => client.room.name == current_chat.room_name);
-		const date = new Date();
-
-		// Clone private message template
-		let message_box = this.private_message_template.cloneNode(true);	
-
-		// Set message contents
-		message_box.get(".message-content").innerText = this.input.value;
-		message_box.get(".message-time").innerText = date.getTime();
-
-		// Add template to the DOM
-		current_conversation.get(".conversation").appendChild(message_box);		
-
-		//Delete template old attributes and set class
-		message_box.removeAttribute('id');
-		message_box.className = "user-message";
-
-		// Show new message
-		message_box.show();
-
-		//Update scrollbar focus
-		message_box.scrollIntoView();
-
-		// Build and send private message through WebSocket
-		const message = new this.Message("private", this.my_user.ids[current_chat.room_name], this.input.value, date.getTime());
-		const string_message = JSON.stringify(message);
-		client.sendMessage(string_message, current_chat.clients);
-	},
-
-	sendPublicMessage: function()
-	{
-		// Create vars
-		const current_conversation = this.HTML_conversations.get(".current");
+		const room_name = current_chat.room_name;
+		const client = Server.clients.find(client => client.room.name == room_name);
+		const user_id = this.my_user.ids[room_name];
 		const last_child = current_conversation.get(".conversation").lastElementChild;
-		const current_chat = this.chats[this.current_chat_id];
-		const client = Server.clients.find(client => client.room.name == current_chat.room_name);
+		const last_message = this.conversations_log[room_name].slice(-1)[0];
 		const date = new Date();
 
 		// Get layout type
 		let layout_type;
 		switch(true)
 		{
-			case last_child == null:
+			case last_message == undefined:
 				layout_type = "new";
 				break;
-			case last_child.classList.contains("user-message-layout"):
+			case last_message.user == user_id:
 				layout_type = "concurrent";
 				break;
 			default:
@@ -274,6 +241,40 @@ var Casada =
 		Server.storeMessage(current_chat.room_name, message)	
 	},
 
+	sendPrivateMessage: function()
+	{
+		// Create vars
+		const current_conversation = this.HTML_conversations.get(".current");
+		const current_chat = this.chats[this.current_chat_id];
+		const client = Server.clients.find(client => client.room.name == current_chat.room_name);
+		const date = new Date();
+
+		// Clone private message template
+		let message_box = this.private_message_template.cloneNode(true);	
+
+		// Set message contents
+		message_box.get(".message-content").innerText = this.input.value;
+		message_box.get(".message-time").innerText = date.getTime();
+
+		// Add template to the DOM
+		current_conversation.get(".conversation").appendChild(message_box);		
+
+		//Delete template old attributes and set class
+		message_box.removeAttribute('id');
+		message_box.className = "user-message";
+
+		// Show new message
+		message_box.show();
+
+		//Update scrollbar focus
+		message_box.scrollIntoView();
+
+		// Build and send private message through WebSocket
+		const message = new this.Message("private", this.my_user.ids[current_chat.room_name], this.input.value, date.getTime());
+		const string_message = JSON.stringify(message);
+		client.sendMessage(string_message, current_chat.clients);
+	},
+
 	sendLogReady: function(client)
 	{
 		// Build message
@@ -286,21 +287,22 @@ var Casada =
 
 	/********************************** SHOW MESSAGES **********************************/
 
-	showGroupMessage: function(room_name, message)
+	showRoomMessage: function(room_name, message)
 	{
 		// Fetch data
 		const conversation = this.HTML_conversations.get(`#conversation-${room_name}`);
-		const last_child = conversation.get(".conversation").lastElementChild;
 		const user = this.users[message.user];
+		const last_child = conversation.get(".conversation").lastElementChild;
+		const last_message = this.conversations_log[room_name].slice(-1)[0];
 
 		// Get layout type
 		let layout_type;
 		switch(true)
 		{
-			case last_child == null:
+			case last_message == undefined:
 				layout_type = "new";
 				break;
-			case last_child.classList.contains("people-message-layout"):
+			case last_message.user == message.user:
 				layout_type = "concurrent";
 				break;
 			default:
@@ -576,7 +578,7 @@ var Casada =
 
 	/********************************** USER ENTRANCE AND EXIT **********************************/
 
-	setUpEntrance: function(client, master)
+	setUpEntrance: function(client)
 	{
 		// Get vars
 		const room_name = client.room.name
@@ -588,17 +590,25 @@ var Casada =
 		const ping = new this.Message("profile", user_id, null, null); // ping informing the user info is ready
 		const join = new this.Message("system", "Casada", `${user_nick} has joined the room`, date.getTime()); // join message
 
-		// Send messages
+		// Send ping
 		client.sendMessage(JSON.stringify(ping, null, 2)); 
-		client.sendMessage(JSON.stringify(join, null, 2)); 
 
-		// If current user is the master (the oldest one), store the join message
-		if(user_id == master)
-			Server.storeMessage(room_name, join); 
+		// Store join message
+		Server.storeMessage(room_name, join); 
 
-		// Show entrance message
+		// Show join message
 		this.showSystemMessage(room_name, "You have joined the room");
 	},
+
+	showJoin: function(client)
+	{
+		// Get vars
+		const room_name = client.room.name
+		const user_nick = Casada.my_user.nick.innerText;
+
+		// Show join message
+		this.showSystemMessage(room_name, `${user_nick} has joined the room`);
+	},	
 
 	setUpExit: function(client, master)
 	{
