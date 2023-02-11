@@ -6,6 +6,9 @@ var Server =
 	server_address : "wss://ecv-etic.upf.edu/node/9000/ws",
 	clients: [],
 
+	//Typing
+	timer : null,
+
     /********************************** SERVER CLIENT **********************************/
 
     newClient: function()
@@ -59,6 +62,13 @@ var Server =
             }
         });
     },
+
+	getCurrentClient: function()
+	{
+		const current_chat = Casada.getCurrentChat();
+		const client = Server.clients.find(client => client.room.name == current_chat.room_name);
+		return client;
+	},
 
     /********************************** CALLBACKS **********************************/
 
@@ -160,6 +170,9 @@ var Server =
 		// Load log
 		await Server.loadRoomLog(this.room.name);
 
+		// Update chats
+		Casada.updateChats();
+
 		// Store my data
 		await Server.storeUserData();
 
@@ -179,10 +192,10 @@ var Server =
 				Casada.showRoomMessage(this.room.name, message);
 				break;
 			case "typing":
-				console.log("typing");
+				Casada.showTyping(this.room.name, message);
 				break;
 			case "private":
-				Casada.showPrivateMessage(message.user, message.content);
+				Casada.showPrivateMessage(message.user, message);
 				break;
 			case "system":
 				Casada.showSystemMessage(this.room.name, message.content);
@@ -190,8 +203,7 @@ var Server =
 			case "profile":	
 				Server.loadUserData(message.user);
 				break;
-		}
-			
+		}				
 	},
 
     /********************************** SERVER TOOLS **********************************/
@@ -269,7 +281,7 @@ var Server =
 				}
 	
 				// Store data in the db (not sure about race condition protection)
-				client.storeData("Casada_users", JSON.stringify(obj, null, 2), () => resolve());
+				client.storeData("Casada_users", JSON.stringify(obj, null, 2), resolve);
 			});
 		});		
 	},
@@ -333,22 +345,23 @@ var Server =
 
 	storeMessage: async function(room_name, message)
 	{
+		// Update local storage
+		Casada.conversations_log[room_name] == undefined ? Casada.conversations_log[room_name] = [message] : Casada.conversations_log[room_name].push(message);
+
         // Get client
         const client = await this.getClient(0);
 
 		client.loadData("Casada_log", (data) => {
-			
+		
 			// Parse obj
 			let obj = JSON.parse(data || "{}");
 	
-			// Update cloud and local data
+			// Update cloud data
 			obj[room_name] == undefined ? obj[room_name] = [message] : obj[room_name].push(message);
-			Casada.conversations_log[room_name] == undefined ? Casada.conversations_log[room_name] = [message] : Casada.conversations_log[room_name].push(message);
 
 			// Store data in the db (not sure about race condition protection)
 			client.storeData("Casada_log", JSON.stringify(obj, null, 2));
-		});
-		
+		});		
 	},
 
 	loadRoomLog: async function(room_name)

@@ -31,8 +31,10 @@ https://www.tutorialrepublic.com/faq/how-to-find-an-object-by-property-value-in-
 https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event
 https://stackoverflow.com/questions/36869615/how-to-edit-an-external-json-file-in-javascript
 https://stackoverflow.com/questions/5409641/set-a-variable-if-undefined-in-javascript
-
-https://stackoverflow.com/questions/4810841/pretty-print-json-using-javascript 
+https://stackoverflow.com/questions/41336663/console-logresult-prints-object-object-how-do-i-get-result-name 
+https://stackoverflow.com/questions/4810841/pretty-print-json-using-javascript
+https://blog.devgenius.io/how-to-reset-the-settimeout-timer-with-javascript-b722aa4f931
+https://stackoverflow.com/questions/3247173/can-i-see-if-a-timer-is-still-running 
 
 
 

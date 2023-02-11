@@ -533,7 +533,7 @@ background-color: var(--light3-dark-color);
 /* SUPER CENTERED */
 .menu-grid
 {
-    display: grid;
+    display: none;
     place-items: center;
     position: absolute;
     height: -webkit-fill-available;

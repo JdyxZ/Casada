@@ -38,8 +38,8 @@
     - Conversation status.✅
     - Last sent message.✅
     - Several client instances.✅
-    - Store & send log.⏺ (solve bug on different client different layout)
-    - Typing.
+    - Store & send log.✅
+    - Typing.⏺
     - Create a room menu.
     - Avatar selector.
     - Resizable menus.
@@ -54,7 +54,7 @@
 - When click out of the scope of room menu, exit menu.
 - Change messages CSS.
 - Resolve, fail.
-- Internet connection
+- Internet connection.
 - Last details: Choose room, avatar, nick on enter; etc.
 
 ## Notas

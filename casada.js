@@ -13,6 +13,7 @@ var Casada =
 	search_bar_box : document.get(".grid-chats .search-bar"),
 	chat_search_bar : document.get("#chat-search-bar"),
 	chat_eraser : document.get("#chat-eraser"),
+	chat_profile : document.get(".grid-chat-profile .contents"),
 	HTML_chats : document.get("#chats"),
 	HTML_conversations : document.get("#conversations"),
 
@@ -37,6 +38,7 @@ var Casada =
 
 	// Conversations
 	conversations_log : {}, // local copy of conversation log
+	last_sender : null,
 
 	// Scroll
 	conversation_scrolls : {},
@@ -115,6 +117,30 @@ var Casada =
 		}
 	},
 
+	/********************************** GETTERS **********************************/
+
+	getCurrentChat: function()
+	{
+		return this.chats[this.current_chat_id];
+	},
+
+	getUserID: function(room_name)
+	{
+		if (room_name)
+			return this.my_user.ids[room_name];
+		else
+			return this.my_user.ids[this.getCurrentChat().room_name];
+		
+	},
+
+	getLastMessage: function(room_name)
+	{
+		if (this.conversations_log[room_name] == undefined) // Little hack
+			return new this.Message("system", null, null, null);
+		else
+			return this.conversations_log[room_name].slice(-1)[0];
+	},
+
 	/********************************** EVENTS **********************************/
 
 	onKeyDown: function(event)
@@ -131,6 +157,10 @@ var Casada =
 			{
 				Casada.sendMessage();
 			}
+
+			// Typing
+			const current_chat = Casada.getCurrentChat();
+			Casada.sendTyping(current_chat.type);
 		}
 		
 		if(event.code == "Escape")
@@ -163,7 +193,8 @@ var Casada =
 		if (this.input.value == '') return;
 
 		// Auxiliar variables
-		const type = this.chats[this.current_chat_id].type == "private";
+		const current_chat = this.getCurrentChat();
+		const type = current_chat.type == "private";
 
 		// Send private or public message
 		switch(type)
@@ -177,7 +208,7 @@ var Casada =
 		}
 
 		// Update last message
-		this.updateChatLastMessage(this.current_chat_id, type ? null : "You", this.input.value);
+		this.updateChatLastMessage(this.current_chat_id);
 
 		// Clean input box
 		this.input.value = '';
@@ -188,22 +219,20 @@ var Casada =
 	{
 		// Create vars
 		const current_conversation = this.HTML_conversations.get(".current");
-		const current_chat = this.chats[this.current_chat_id];
-		const room_name = current_chat.room_name;
-		const client = Server.clients.find(client => client.room.name == room_name);
-		const user_id = this.my_user.ids[room_name];
+		const current_chat = this.getCurrentChat();
+		const client = Server.getCurrentClient();
+		const user_id = this.getUserID(current_chat.room_name);
 		const last_child = current_conversation.get(".conversation").lastElementChild;
-		const last_message = this.conversations_log[room_name].slice(-1)[0];
 		const date = new Date();
 
 		// Get layout type
 		let layout_type;
 		switch(true)
 		{
-			case last_message == undefined:
+			case this.last_sender == null:
 				layout_type = "new";
 				break;
-			case last_message.user == user_id:
+			case this.last_sender == user_id:
 				layout_type = "concurrent";
 				break;
 			default:
@@ -233,20 +262,24 @@ var Casada =
 		message_box.scrollIntoView();		
 
 		// Build and send public message through WebSocket
-		const message = new this.Message("text", this.my_user.ids[current_chat.room_name], this.input.value, date.getTime());
+		const message = new this.Message("text", user_id, this.input.value, date.getTime());
 		const message_string = JSON.stringify(message);
 		client.sendMessage(message_string);
 
 		// Store message in the DB
-		Server.storeMessage(current_chat.room_name, message)	
+		Server.storeMessage(current_chat.room_name, message)
+
+		// Update last sender id
+		this.last_sender = user_id;
 	},
 
 	sendPrivateMessage: function()
 	{
 		// Create vars
 		const current_conversation = this.HTML_conversations.get(".current");
-		const current_chat = this.chats[this.current_chat_id];
-		const client = Server.clients.find(client => client.room.name == current_chat.room_name);
+		const current_chat = this.getCurrentChat();
+		const client = Server.getCurrentClient();
+		const user_id = this.getUserID(current_chat.room_name);
 		const date = new Date();
 
 		// Clone private message template
@@ -270,9 +303,12 @@ var Casada =
 		message_box.scrollIntoView();
 
 		// Build and send private message through WebSocket
-		const message = new this.Message("private", this.my_user.ids[current_chat.room_name], this.input.value, date.getTime());
+		const message = new this.Message("private", user_id, this.input.value, date.getTime());
 		const string_message = JSON.stringify(message);
 		client.sendMessage(string_message, current_chat.clients);
+
+		// Update local storage
+		Casada.conversations_log[current_chat.clients[0]] == undefined ? Casada.conversations_log[current_chat.clients] = [message] : Casada.conversations_log[current_chat.clients].push(message);
 	},
 
 	sendLogReady: function(client)
@@ -285,6 +321,16 @@ var Casada =
 		client.sendMessage(string_message);
 	},
 
+	sendTyping: function(type)
+	{
+		// Get proper client and user id
+		const client = Server.getCurrentClient();
+
+		// Send typing message
+		const msg = new this.Message("typing", this.getUserID(null), type, null);
+		client.sendMessage(JSON.stringify(msg));
+	},
+
 	/********************************** SHOW MESSAGES **********************************/
 
 	showRoomMessage: function(room_name, message)
@@ -293,16 +339,15 @@ var Casada =
 		const conversation = this.HTML_conversations.get(`#conversation-${room_name}`);
 		const user = this.users[message.user];
 		const last_child = conversation.get(".conversation").lastElementChild;
-		const last_message = this.conversations_log[room_name].slice(-1)[0];
 
 		// Get layout type
 		let layout_type;
 		switch(true)
 		{
-			case last_message == undefined:
+			case this.last_sender == null:
 				layout_type = "new";
 				break;
-			case last_message.user == message.user:
+			case this.last_sender == message.user:
 				layout_type = "concurrent";
 				break;
 			default:
@@ -339,7 +384,10 @@ var Casada =
 			message_box.scrollIntoView();
 
 		// Update last message
-		this.updateChatLastMessage(room_name, user == null ? message.user : user.nick, message.content);
+		this.updateChatLastMessage(room_name);
+
+		// Update last sender id
+		this.last_sender = message.user;
 	},
 
 	showPrivateMessage: function(sender_id, message)
@@ -366,15 +414,18 @@ var Casada =
 		if (this.current_chat_id == sender_id)
 			message_box.scrollIntoView();
 
+		// Update local storage
+		Casada.conversations_log[sender_id] == undefined ? Casada.conversations_log[sender_id] = [message] : Casada.conversations_log[sender_id].push(message);
+
 		// Update last message
-		this.updateChatLastMessage(sender_id, null, message.content);
+		this.updateChatLastMessage(sender_id);
 	},
 
 	showSystemMessage: function(conversation_id, message)
 	{
 		// Fetch data
 		const conversation = this.HTML_conversations.get(`#conversation-${conversation_id}`);
-		const current_chat = this.chats[this.current_chat_id];
+		const current_chat = this.getCurrentChat();
 
 		// Clone status message template and set it up
 		let message_box = this.status_message_template.cloneNode(true);	
@@ -392,6 +443,60 @@ var Casada =
 		//Update scrollbar focus if user is on the current conversation
 		if (this.current_chat_id == conversation_id)
 			message_box.scrollIntoView();
+		
+		// Update last sender id
+		this.last_sender = "system";
+	},
+
+	showTyping(room_name, message)
+	{
+		// Private chat
+		if(message.content == "private")
+		{
+			// Some vars
+			const chat = this.chats[message.user];
+			const HTML_chat = this.HTML_chats.get(`#chat-${message.user}`);	
+			const is_current_chat = this.current_chat_id == message.user;
+			
+			// Change status banners to "typing"
+			HTML_chat.get(".last-message").innerText = "typing...";
+			if(is_current_chat) this.chat_profile.get(".status").innerText = "typing...";
+
+			// Clear timer
+			if(chat.timer != null)				
+				clearTimeout(chat.timer);
+
+			// Set timer
+			chat.timer = setTimeout(() => {
+				this.updateChatLastMessage(message.user);
+				this.updateChatProfile();
+				chat.timer = null;
+			}, 2000);
+		}
+
+		// Room chat
+		else if(message.content == "group")
+		{
+			// Some vars
+			const chat = this.chats[room_name];
+			const HTML_chat = this.HTML_chats.get(`#chat-${room_name}`);
+			const is_current_chat = this.current_chat_id == message.user;
+			
+			// Change chat status banner to "typing"
+			HTML_chat.get(".last-message").innerText = "typing...";
+			if(is_current_chat) this.chat_profile.get(".status").innerText = "typing...";
+
+			// Clear timer
+			if(chat.timer != null)				
+			clearTimeout(chat.timer);
+
+			// Set timer
+			chat.timer = setTimeout(() => {
+				this.updateChatLastMessage(message.user);
+				this.updateChatProfile();
+				chat.timer = null;
+			}, 2000);
+		}
 	},
 
 	/********************************** LOAD CHATS **********************************/
@@ -460,7 +565,8 @@ var Casada =
 			room_name : room_name,
 			type : "group",
 			clients : client_info,
-			online: room_status
+			online: room_status,
+			timer: null
 		}
 		this.chats[room_name] = room_chat;		
 	},
@@ -493,10 +599,6 @@ var Casada =
 		this.HTML_chats.appendChild(new_chat);
 		this.HTML_conversations.appendChild(new_conversation);
 
-		// Update chat content with built-in methods
-		this.updateChat(client_id);
-		this.updateChatLastMessage(client_id, null, "Last sent message");
-
 		// Show new elements
 		new_chat.show();
 		new_conversation.show();
@@ -507,7 +609,8 @@ var Casada =
 			room_name : room_name,
 			type : "private",
 			clients : [client_id],
-			online: true
+			online: true,
+			timer: null
 		}
 		this.chats[client_id] = private_chat;
 	},
@@ -581,7 +684,7 @@ var Casada =
 	setUpEntrance: function(client)
 	{
 		// Get vars
-		const room_name = client.room.name
+		const room_name = client.room.name;
 		const user_id = Casada.my_user.ids[room_name];
 		const user_nick = Casada.my_user.nick.innerText;
 
@@ -603,7 +706,7 @@ var Casada =
 	showJoin: function(client)
 	{
 		// Get vars
-		const room_name = client.room.name
+		const room_name = client.room.name;
 		const user_nick = Casada.my_user.nick.innerText;
 
 		// Show join message
@@ -613,7 +716,7 @@ var Casada =
 	setUpExit: function(client, master)
 	{
 		// Get vars
-		const room_name = client.room.name
+		const room_name = client.room.name;
 		const user_id = Casada.my_user.ids[room_name];
 		const user_nick = Casada.my_user.nick.innerText;
 
@@ -657,13 +760,12 @@ var Casada =
 	updateChatProfile: function()
 	{
 		// Profile chat vars
-		const current_chat = this.chats[this.current_chat_id];
+		const current_chat = this.getCurrentChat();
 		const current_room = current_chat.room_name;
-		const chat_profile = document.get(".grid-chat-profile .contents");
 		const user = this.users[this.current_chat_id];
-		const avatar = chat_profile.get(".avatar");
-		const username = chat_profile.get(".username");
-		const status = chat_profile.get(".status");
+		const avatar = this.chat_profile.get(".avatar");
+		const username = this.chat_profile.get(".username");
+		const status = this.chat_profile.get(".status");
 
 		// Update profile chat info
 		if(current_chat.type == "private")
@@ -686,7 +788,7 @@ var Casada =
 				let result = "You, ";
 				current_chat.clients.forEach(id => 
 				{ 
-					if (id != this.my_user.ids[current_room]) 
+					if (id != this.getUserID(current_room)) 
 					{
 						const user = this.users[id];
 
@@ -700,17 +802,40 @@ var Casada =
 					
 	},
 
-	updateChat: function(id)
+	updateChat: function(chat_id)
 	{
-		const chat = this.HTML_chats.get(`#chat-${id}`);
-		const user = this.users[id];
-		chat.get(".username").innerText =  user == null ? id : user.nick;
+		const chat = this.HTML_chats.get(`#chat-${chat_id}`);
+		const user = this.users[chat_id];
+		chat.get(".username").innerText =  user == null ? chat_id : user.nick;
 		chat.get(".avatar").src = user == null ?  "images/default_avatar.jpg" : user.avatar;
 	},
 
-	updateChatLastMessage: function(chat_id, sender, message)
+	updateChatLastMessage: function(chat_id)
 	{
-		this.HTML_chats.get(`#chat-${chat_id} .last-message`).innerText = sender ? `${sender}: ${message}` : message;
+		// Get chat and last message
+		const chat = this.chats[chat_id];
+		const last_message = this.getLastMessage(chat_id);
+
+		// Check message type
+		if(last_message.type == "system"){
+			this.HTML_chats.get(`#chat-${chat_id} .last-message`).innerText = "Last message";
+			return;
+		};
+
+		// Build message
+		const prefix = last_message.user == this.getUserID(null) ? "You:" : `${this.users[last_message.user].nick}:`;
+		const content = last_message.content;
+
+		// Set last message
+		this.HTML_chats.get(`#chat-${chat_id} .last-message`).innerText = `${prefix} ${content}`;
+	},
+
+	updateChats: function()
+	{
+		Object.keys(this.chats).forEach((chat_id) => {
+			this.updateChat(chat_id);
+			this.updateChatLastMessage(chat_id);
+		});
 	},
 
 	/********************************** CHAT TOOLS **********************************/
