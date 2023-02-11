@@ -39,7 +39,7 @@
     - Last sent message.✅
     - Several client instances.✅
     - Store & send log.✅
-    - Typing.⏺
+    - Typing.✅
     - Create a room menu.
     - Avatar selector.
     - Resizable menus.

@@ -43,6 +43,9 @@ var Casada =
 	// Scroll
 	conversation_scrolls : {},
 
+	// Typing
+	typing_timeout : 2000, // [ms]
+
 	// Message constructor
 	Message: function(type, user, content, time)
 	{
@@ -166,8 +169,7 @@ var Casada =
 			}
 
 			// Typing
-			const current_chat = Casada.getCurrentChat();
-			Casada.sendTyping(current_chat.type);
+			Casada.sendTyping();
 		}
 		
 		if(event.code == "Escape")
@@ -328,14 +330,15 @@ var Casada =
 		client.sendMessage(string_message);
 	},
 
-	sendTyping: function(type)
+	sendTyping: function()
 	{
-		// Get proper client and user id
+		// Get data
 		const client = Server.getCurrentClient();
+		const chat = Casada.getCurrentChat();
 
 		// Send typing message
-		const msg = new this.Message("typing", this.getMyUserID(null), type, null);
-		client.sendMessage(JSON.stringify(msg));
+		const msg = new this.Message("typing", this.getMyUserID(null), chat.type, null);
+		chat.type == "group" ? client.sendMessage(JSON.stringify(msg)) : client.sendMessage(JSON.stringify(msg), chat.clients);
 	},
 
 	/********************************** SHOW MESSAGES **********************************/
@@ -465,20 +468,24 @@ var Casada =
 			const HTML_chat = this.HTML_chats.get(`#chat-${message.user}`);	
 			const is_current_chat = this.current_chat_id == message.user;
 
-			// Clear timer
-			if(chat.timer != null)				
-			clearTimeout(chat.timer);
+			// Check timer
+			switch(chat.timer)
+			{
+				case null: // Timer is not active: Set typing message
+					HTML_chat.get(".last-message").innerText = "typing...";
+					if(is_current_chat) this.chat_profile.get(".status").innerText = "typing...";
+					break;
+				default: //  Timer is already active: Delete old timer
+					clearTimeout(chat.timer);
+					break;				
+			}
 
 			// Set timer
 			chat.timer = setTimeout(() => {
+				chat.timer = null;
 				this.updateChatLastMessage(message.user);
 				this.updateChatProfile();
-				chat.timer = null;
-			}, 2000);
-
-			// Set typing message
-			HTML_chat.get(".last-message").innerText = "typing...";
-			if(is_current_chat) this.chat_profile.get(".status").innerText = "typing...";
+			}, this.typing_timeout);
 		}
 
 		// Room chat
@@ -487,65 +494,43 @@ var Casada =
 			// Some vars
 			const chat = this.chats[room_name];
 			const HTML_chat = this.HTML_chats.get(`#chat-${room_name}`);
-			const is_current_chat = this.current_chat_id == message.user;
-			// const element = chat.timers.filter(({user_id, _}) => user_id == message.user);
-			// const exists = chat.timers.reduce((acc, {user_id, _}) => acc | user_id == message.user, false) 
-			const index = chat.timers.reduce((acc, {user_id,_} , index) => {
-				if (user_id == message.user) acc = index;
-				return acc;
-			}, -1);
+			const is_current_chat = this.current_chat_id == room_name;
+			const index = chat.timers.getObjectIndex("user_id", message.user);
 
-			// Set new timer			
+			// Create new timer			
 			const new_timer = setTimeout(() => {
-				if (chat.timers.length == 1)
-				{
-					this.updateChatLastMessage(message.user);
-					this.updateChatProfile();
-				}
-				else
-				{
-					updateTypingMessage(chat.timers);
-				}
-			}, 2000);
+				
+				// Remove object from timers
+				const index = chat.timers.getObjectIndex("user_id", message.user);
+				chat.timers.splice(index, 1);
 
-			// Timer already exists
-			if(index != -1)
-			{
-				// Clear old timer
-				clearTimeout(chat.timers[index].timer);
+				// Take the proper action
+				switch(chat.timers.length)
+				{
+					case 0:
+						this.updateChatLastMessage(room_name);
+						this.updateChatProfile();
+						break;
+					default:
+						this.updateTypingMessage(chat.timers, room_name, is_current_chat);
+						break;
+				}
+			}, this.typing_timeout);
 
-				// Set new timer
-				chat.timers[index].timer = new_timer;
-			}
-			// Timer doesn't exist
-			else
+			// Check timer
+			switch(index)
 			{
-				// Push user_info plus timer
-				chat.timers.push({user_id: message.user, timer : new_timer});
-			}
-			
-			updateTypingMessage(chat.timers);
+				case -1: // Timer doesn't exist: Append new one to the list
+					chat.timers.push({user_id: message.user, timer : new_timer}); // Push user_info plus timer
+					this.updateTypingMessage(chat.timers, room_name, is_current_chat); // Update typing
+					break;
+				default: // Timer already exists: Clear old one and set new one
+					clearTimeout(chat.timers[index].timer); // Clear old timer
+					chat.timers[index].timer = new_timer; // Set new timer
+					break;
+			}			
 		}
 	},
-
-	updateTypingMessage(timers)
-	{
-		// Check array of timers and build typing message
-		const typing_message;
-		switch(timers.length)
-		{
-			case 1:
-				typing_message = `${this.getUserNick(message.user) is typing...}`;
-			case default:			
-				typing_message = timers.map( ({user_id, _}, index) => {
-					index == t_size - 1 ? `${this.getUserNick(user_id)}` : `${this.getUserNick(user_id)},`;
-				}).join(" ") + " are typing...";
-		}
-
-		// Set typing message
-		HTML_chat.get(".last-message").innerText = typing_message;
-		if(is_current_chat) this.chat_profile.get(".status").innerText = typing_message;
-	}
 
 	/********************************** LOAD CHATS **********************************/
 
@@ -884,6 +869,27 @@ var Casada =
 			this.updateChat(chat_id);
 			this.updateChatLastMessage(chat_id);
 		});
+	},
+
+	updateTypingMessage(timers, room_name, is_current_chat)
+	{
+		// Check array of timers and build typing message
+		let typing_message;
+		switch(timers.length)
+		{
+			case 1:
+				typing_message = `${this.getUserNick(timers[0].user_id)} is typing...`;
+				break;
+			 default:			
+				typing_message = timers.map( ({user_id, _}, index) => 
+					index == timers.length - 1 ? `${Casada.getUserNick(user_id)}` : `${Casada.getUserNick(user_id)},`
+				).join(" ") + " are typing...";
+				break;
+		}
+
+		// Set typing message
+		this.HTML_chats.get(`#chat-${room_name} .last-message`).innerText = typing_message;
+		if(is_current_chat) this.chat_profile.get(".status").innerText = typing_message;
 	},
 
 	/********************************** CHAT TOOLS **********************************/

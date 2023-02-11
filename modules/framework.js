@@ -152,3 +152,21 @@ String.prototype.reverseString = function()
 	}
 	return reversed_string.join("");
  }
+
+ Array.prototype.containsObject = function(property, value)
+ {
+	return this.reduce((acc, {property, _}) => acc | property == value, false) 
+ }
+
+ Array.prototype.getObject = function(property, value)
+ {
+	return this.filter(({property, _}) => property == value);
+ }
+
+ Array.prototype.getObjectIndex = function(property, value)
+ {
+	return this.reduce((acc, element , index) => {
+		if (element[property] == value) acc = index;
+		return acc;
+	}, -1);
+ }

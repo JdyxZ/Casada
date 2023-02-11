@@ -34,7 +34,7 @@ https://stackoverflow.com/questions/5409641/set-a-variable-if-undefined-in-javas
 https://stackoverflow.com/questions/41336663/console-logresult-prints-object-object-how-do-i-get-result-name 
 https://stackoverflow.com/questions/4810841/pretty-print-json-using-javascript
 https://blog.devgenius.io/how-to-reset-the-settimeout-timer-with-javascript-b722aa4f931
-https://stackoverflow.com/questions/3247173/can-i-see-if-a-timer-is-still-running 
+https://stackoverflow.com/questions/3247173/can-i-see-if-a-timer-is-still-running  
 
 
 
