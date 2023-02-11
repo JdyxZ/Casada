@@ -124,7 +124,14 @@ var Casada =
 		return this.chats[this.current_chat_id];
 	},
 
-	getUserID: function(room_name)
+	getUserNick: function(id)
+	{
+		const user = this.users[id]
+		if(user == undefined) return null;
+		else return this.users[id].nick;
+	},
+
+	getMyUserID: function(room_name)
 	{
 		if (room_name)
 			return this.my_user.ids[room_name];
@@ -221,7 +228,7 @@ var Casada =
 		const current_conversation = this.HTML_conversations.get(".current");
 		const current_chat = this.getCurrentChat();
 		const client = Server.getCurrentClient();
-		const user_id = this.getUserID(current_chat.room_name);
+		const user_id = this.getMyUserID(current_chat.room_name);
 		const last_child = current_conversation.get(".conversation").lastElementChild;
 		const date = new Date();
 
@@ -279,7 +286,7 @@ var Casada =
 		const current_conversation = this.HTML_conversations.get(".current");
 		const current_chat = this.getCurrentChat();
 		const client = Server.getCurrentClient();
-		const user_id = this.getUserID(current_chat.room_name);
+		const user_id = this.getMyUserID(current_chat.room_name);
 		const date = new Date();
 
 		// Clone private message template
@@ -327,7 +334,7 @@ var Casada =
 		const client = Server.getCurrentClient();
 
 		// Send typing message
-		const msg = new this.Message("typing", this.getUserID(null), type, null);
+		const msg = new this.Message("typing", this.getMyUserID(null), type, null);
 		client.sendMessage(JSON.stringify(msg));
 	},
 
@@ -457,34 +464,6 @@ var Casada =
 			const chat = this.chats[message.user];
 			const HTML_chat = this.HTML_chats.get(`#chat-${message.user}`);	
 			const is_current_chat = this.current_chat_id == message.user;
-			
-			// Change status banners to "typing"
-			HTML_chat.get(".last-message").innerText = "typing...";
-			if(is_current_chat) this.chat_profile.get(".status").innerText = "typing...";
-
-			// Clear timer
-			if(chat.timer != null)				
-				clearTimeout(chat.timer);
-
-			// Set timer
-			chat.timer = setTimeout(() => {
-				this.updateChatLastMessage(message.user);
-				this.updateChatProfile();
-				chat.timer = null;
-			}, 2000);
-		}
-
-		// Room chat
-		else if(message.content == "group")
-		{
-			// Some vars
-			const chat = this.chats[room_name];
-			const HTML_chat = this.HTML_chats.get(`#chat-${room_name}`);
-			const is_current_chat = this.current_chat_id == message.user;
-			
-			// Change chat status banner to "typing"
-			HTML_chat.get(".last-message").innerText = "typing...";
-			if(is_current_chat) this.chat_profile.get(".status").innerText = "typing...";
 
 			// Clear timer
 			if(chat.timer != null)				
@@ -496,8 +475,77 @@ var Casada =
 				this.updateChatProfile();
 				chat.timer = null;
 			}, 2000);
+
+			// Set typing message
+			HTML_chat.get(".last-message").innerText = "typing...";
+			if(is_current_chat) this.chat_profile.get(".status").innerText = "typing...";
+		}
+
+		// Room chat
+		else if(message.content == "group")
+		{
+			// Some vars
+			const chat = this.chats[room_name];
+			const HTML_chat = this.HTML_chats.get(`#chat-${room_name}`);
+			const is_current_chat = this.current_chat_id == message.user;
+			// const element = chat.timers.filter(({user_id, _}) => user_id == message.user);
+			// const exists = chat.timers.reduce((acc, {user_id, _}) => acc | user_id == message.user, false) 
+			const index = chat.timers.reduce((acc, {user_id,_} , index) => {
+				if (user_id == message.user) acc = index;
+				return acc;
+			}, -1);
+
+			// Set new timer			
+			const new_timer = setTimeout(() => {
+				if (chat.timers.length == 1)
+				{
+					this.updateChatLastMessage(message.user);
+					this.updateChatProfile();
+				}
+				else
+				{
+					updateTypingMessage(chat.timers);
+				}
+			}, 2000);
+
+			// Timer already exists
+			if(index != -1)
+			{
+				// Clear old timer
+				clearTimeout(chat.timers[index].timer);
+
+				// Set new timer
+				chat.timers[index].timer = new_timer;
+			}
+			// Timer doesn't exist
+			else
+			{
+				// Push user_info plus timer
+				chat.timers.push({user_id: message.user, timer : new_timer});
+			}
+			
+			updateTypingMessage(chat.timers);
 		}
 	},
+
+	updateTypingMessage(timers)
+	{
+		// Check array of timers and build typing message
+		const typing_message;
+		switch(timers.length)
+		{
+			case 1:
+				typing_message = `${this.getUserNick(message.user) is typing...}`;
+			case default:			
+				typing_message = timers.map( ({user_id, _}, index) => {
+					index == t_size - 1 ? `${this.getUserNick(user_id)}` : `${this.getUserNick(user_id)},`;
+				}).join(" ") + " are typing...";
+		}
+
+		// Set typing message
+		HTML_chat.get(".last-message").innerText = typing_message;
+		if(is_current_chat) this.chat_profile.get(".status").innerText = typing_message;
+	}
 
 	/********************************** LOAD CHATS **********************************/
 
@@ -566,7 +614,7 @@ var Casada =
 			type : "group",
 			clients : client_info,
 			online: room_status,
-			timer: null
+			timers: []
 		}
 		this.chats[room_name] = room_chat;		
 	},
@@ -788,7 +836,7 @@ var Casada =
 				let result = "You, ";
 				current_chat.clients.forEach(id => 
 				{ 
-					if (id != this.getUserID(current_room)) 
+					if (id != this.getMyUserID(current_room)) 
 					{
 						const user = this.users[id];
 
@@ -807,7 +855,7 @@ var Casada =
 		const chat = this.HTML_chats.get(`#chat-${chat_id}`);
 		const user = this.users[chat_id];
 		chat.get(".username").innerText =  user == null ? chat_id : user.nick;
-		chat.get(".avatar").src = user == null ?  "images/default_avatar.jpg" : user.avatar;
+		chat.get(".avatar").src = user == null ?  (chat.type == "private" ? "images/default_avatar.jpg" : "images/default_group_avatar.jpeg") : user.avatar;
 	},
 
 	updateChatLastMessage: function(chat_id)
@@ -823,7 +871,7 @@ var Casada =
 		};
 
 		// Build message
-		const prefix = last_message.user == this.getUserID(null) ? "You:" : `${this.users[last_message.user].nick}:`;
+		const prefix = last_message.user == this.getMyUserID(null) ? "You:" : `${this.users[last_message.user].nick}:`;
 		const content = last_message.content;
 
 		// Set last message
