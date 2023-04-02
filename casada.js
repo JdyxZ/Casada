@@ -882,7 +882,7 @@ var Casada =
 				break;
 			 default:			
 				typing_message = timers.map( ({user_id, _}, index) => 
-					index == timers.length - 1 ? `${Casada.getUserNick(user_id)}` : `${Casada.getUserNick(user_id)},`
+					index == timers.length - 1 ? `and ${Casada.getUserNick(user_id)}` : `${Casada.getUserNick(user_id)},`
 				).join(" ") + " are typing...";
 				break;
 		}

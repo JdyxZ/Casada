@@ -34,26 +34,24 @@
     - Fade chat when user leaves.✅
     - Send images over internet. ✅
     - Users database. ✅
-    - Conversation status messages.✅
-    - Conversation status.✅
-    - Last sent message.✅
-    - Several client instances.✅
-    - Store & send log.✅
-    - Typing.✅
-    - Create a room menu.
+    - Conversation status messages. ✅
+    - Conversation status. ✅
+    - Last sent message. ✅
+    - Several client instances. ✅
+    - Store & send log. ✅
+    - Typing. ✅
+    - Resizable menus. ✅
+    - Room selector.
     - Avatar selector.
-    - Resizable menus.
+    - When click out of the scope of room menu, exit menu.
 - Reorganize code.✅
+- Change the background.✅
 - Check binds, squeeze code (showMessage, sendMessage, loadChats), if (null) return.
 - Sort chats based on the most recent message (with animation?).
-- Unread message status.
+- Unread message status and checked message.
 - Cross animation.
-- Checked message.
-- Change the background.
 - Conversation messages search bar.
-- When click out of the scope of room menu, exit menu.
 - Change messages CSS.
-- Resolve, fail.
 - Internet connection.
 - Last details: Choose room, avatar, nick on enter; etc.
 
